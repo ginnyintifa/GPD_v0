@@ -17,7 +17,8 @@
 #' @param cancer_type TCGA cancer type identifier, e.g. STAD, BRCA. 
 #' @param cancer_barcode TCGA barcodes for this cancer type cohort.
 #' @param sample_cn_id A barcode codebook provided by the packge.
-#' @param quality_filter The minimiu value of QUAL for selection of mutations.
+#' @param chr_name Which chromosomes are of interest, default is all of them.
+#' @param quality_filter The minimiu value of QUAL for selection of mutations, default is 30
 #' @param original_dir The parent directory you would like to have all you output files in.
 #' @param output_dir The directory you would like to have your raw extraction files in.
 #' @import dplyr magrittr data.table
@@ -28,6 +29,7 @@
 #'                                    cancer_type = "STAD,    
 #'                                    cancer_barcode = stad_barcode,
 #'                                    sample_cn_id = sample_cn_id,
+#'                                    chr_name = c(seq(1:22),"X","Y"),
 #'                                    quality_filter = 30,
 #'                                    original_dir = "/data/ginny/tcga_pancan/germline_raw_process/" ,
 #'                                    output_dir = "/data/ginny/tcga_pancan/germline_raw_process/stad_snpeff_type_muts/")
@@ -39,6 +41,7 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
                                cancer_type,
                                cancer_barcode,
                                sample_cn_id,
+                               chr_name = c(seq(1:22),"X","Y"),
                                quality_filter = 30,
                                original_dir,
                                output_dir)
@@ -54,7 +57,7 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
   system(paste0("mkdir ", output_dir))
   
   
-  chr_name = c(seq(1:22),"X","Y")
+ # chr_name = c(seq(1:22),"X","Y")
   
   for(t in 1:length(chr_name))
   {
