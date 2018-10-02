@@ -45,7 +45,14 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
 {
   
   
+  
+  
+  
   snpeff_output_file_names = list.files(raw_snpeff_output_dir)
+  
+  
+  system(paste0("mkdir ", output_dir))
+  
   
   chr_name = c(seq(1:22),"X","Y")
   
@@ -67,6 +74,9 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
     
     combine_chr_data_output_dir = paste0(original_dir,cancer_type,"_snpeff_annotation/")
 
+    system(paste0("mkdir ", combine_chr_data_output_dir))
+    
+    
     
     combine_chr_data(dir_to_combine = output_dir,
                      quality_filter = quality_filter,
