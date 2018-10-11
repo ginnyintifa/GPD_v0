@@ -6,7 +6,7 @@
 \usage{
 germline_extraction_annotation_pos(raw_snpeff_output_dir, cancer_type,
   cancer_barcode, sample_cn_id, chr_name = c(seq(1:22), "X", "Y"),
-  quality_filter = 30, original_dir, output_dir)
+  quality_filter = 30, output_dir, extraction_dir)
 }
 \arguments{
 \item{raw_snpeff_output_dir}{Directory where raw snpeff outputs are stored。}
@@ -21,9 +21,9 @@ germline_extraction_annotation_pos(raw_snpeff_output_dir, cancer_type,
 
 \item{quality_filter}{The minimiu value of QUAL for selection of mutations, default is 30}
 
-\item{original_dir}{The parent directory you would like to have all you output files in.}
+\item{output_dir}{The directory you would like to have your output files in.}
 
-\item{output_dir}{The directory you would like to have your raw extraction files in.}
+\item{extraction_dir}{The directory you would like to have your raw extraction files in.}
 }
 \description{
 This function generates two files as the final products. First, mutations which result in protein-consequence with

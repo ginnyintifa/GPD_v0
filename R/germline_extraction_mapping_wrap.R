@@ -6,8 +6,6 @@
 
 
 
-
-
 #' Extract germline mutations annotated by the snpEff tool for a cancer type of your interest.
 #' 
 #' This function generates two files as the final products. First, mutations which result in protein-consequence with
@@ -19,8 +17,8 @@
 #' @param sample_cn_id A barcode codebook provided by the packge.
 #' @param chr_name Which chromosomes are of interest, default is all of them.
 #' @param quality_filter The minimiu value of QUAL for selection of mutations, default is 30
-#' @param original_dir The parent directory you would like to have all you output files in.
-#' @param output_dir The directory you would like to have your raw extraction files in.
+#' @param output_dir The directory you would like to have your output files in.
+#' @param extraction_dir The directory you would like to have your raw extraction files in.
 #' @import dplyr magrittr data.table
 #' @export
 #' @details 
@@ -31,8 +29,8 @@
 #'                                    sample_cn_id = sample_cn_id,
 #'                                    chr_name = c(seq(1:22),"X","Y"),
 #'                                    quality_filter = 30,
-#'                                    original_dir = "/data/ginny/tcga_pancan/germline_raw_process/" ,
-#'                                    output_dir = "/data/ginny/tcga_pancan/germline_raw_process/stad_snpeff_type_muts/")
+#'                                    output_dir = "/data/ginny/tcga_pancan/germline_raw_process/STAD_snpeff_annotation/" ,
+#'                                    extraction_dir = "/data/ginny/tcga_pancan/germline_raw_process/stad_snpeff_type_muts/")
 
 
 
@@ -43,8 +41,8 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
                                sample_cn_id,
                                chr_name = c(seq(1:22),"X","Y"),
                                quality_filter = 30,
-                               original_dir,
-                               output_dir)
+                               output_dir,
+                               extraction_dir)
 {
   
   
@@ -54,7 +52,7 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
   snpeff_output_file_names = list.files(raw_snpeff_output_dir)
   
   
-  system(paste0("mkdir ", output_dir))
+  system(paste0("mkdir ", extraction_dir))
   
   
  # chr_name = c(seq(1:22),"X","Y")
@@ -67,7 +65,7 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
                                             cancer_type = cancer_type,
                                             cancer_barcode = cancer_barcode,
                                             sample_cn_id = sample_cn_id,
-                                            output_dir = output_dir
+                                            output_dir = extraction_dir
     )
     
     
@@ -75,29 +73,29 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
   }
   
     
-    combine_chr_data_output_dir = paste0(original_dir,cancer_type,"_snpeff_annotation/")
+    #combine_chr_data_output_dir = paste0(original_dir,cancer_type,"_snpeff_annotation/")
 
-    system(paste0("mkdir ", combine_chr_data_output_dir))
+    system(paste0("mkdir ", output_dir))
     
     
     
     combine_chr_data(dir_to_combine = output_dir,
                      quality_filter = quality_filter,
-                     dir_for_output = combine_chr_data_output_dir,
+                     dir_for_output = output_dir,
                      output_name = "snpeff_variant_anno_combine.tsv")
     
     
     
-    divide_germline_to_pc_npc(combine_data_name = paste0(combine_chr_data_output_dir,"snpeff_variant_anno_combine.tsv"),
-                              output_dir = combine_chr_data_output_dir,
+    divide_germline_to_pc_npc(combine_data_name = paste0(output_dir,"snpeff_variant_anno_combine.tsv"),
+                              output_dir = output_dir,
                               pc_output_name = "snpeff_variant_anno_pc.tsv",
                               npc_output_name = "snpeff_variant_anno_npc.tsv")
     
     
     
     
-    annotate_snpeff_combine_pc_position_info(pc_data_name = paste0(combine_chr_data_output_dir, "snpeff_variant_anno_pc.tsv"),
-                                             output_dir = combine_chr_data_output_dir,
+    annotate_snpeff_combine_pc_position_info(pc_data_name = paste0(output_dir, "snpeff_variant_anno_pc.tsv"),
+                                             output_dir = output_dir,
                                              output_name = "snpeff_variant_anno_pc_pos.tsv")
     
     
@@ -109,8 +107,85 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
 
 
 
+# next function is to wrap up the mapping part using function from this dir 
+
+## YES SO FAR SO GOOD 
 
 
 
 
+
+
+#' Map germline pc to piu and bpiu, summarise bpiu and npc per gene
+#' 
+#' This function generates three files as the final products. First, each piu mapped, second, bpiu summarised per gene, third, 
+#' npc summarised per gene.
+#' 
+#' @param ptm_domain_filename  The file provided by the package where the piu information is recorded.
+#' @param pc_data_name the file listing mutations that result in protein consequence. A file generated by function germline_extraction_annotation_pos
+#' @param npc_data_name the file listing mutations that result in non-protein consequence. A file generated by function germline_extraction_annotation_pos
+#' @param cancer_barcode TCGA barcodes for this cancer type cohort.
+#' @param sample_cn_id A barcode codebook provided by the packge.
+#' @param output_dir The directory you would like to have your output files in.
+#' @import dplyr magrittr data.table
+#' @export
+#' @details 
+#' @examples 
+#' germline_piu_mapping (ptm_domain_filename =  "/data/ginny/tcga_pancan/important_files/ptm_domain_combine_df.tsv",
+#'                      pc_data_name  = 
+#'                        "/data/ginny/tcga_pancan/germline_raw_process/STAD_snpeff_annotation/snpeff_variant_anno_pc_pos.tsv",
+#'                      npc_data_name = 
+#'                        "/data/ginny/tcga_pancan/germline_raw_process/STAD_snpeff_annotation/snpeff_variant_anno_npc.tsv",
+#'                      cancer_barcode = stad_barcode,
+#'                      sample_cn_id = sample_cn_id,
+#"                      output_dir = "/data/ginny/tcga_pancan/germline_raw_process/STAD_summarise_mutation/")
+
+germline_piu_mapping = function (ptm_domain_filename,
+                                 pc_data_name,
+                                 npc_data_name,
+                                 cancer_barcode,
+                                 sample_cn_id,
+                                 output_dir)
+  
+{
+  
+  system(paste0("mkdir ", output_dir))
+  
+  
+  all_seq = seq(1:length(sample_cn_id))
+  cancer_seq = all_seq[sample_cn_id %in% cancer_barcode]
+  get_cancer_barcode = sample_cn_id[cancer_seq]
+  this_barcode_seq_df = data.frame(cancer_code = get_cancer_barcode, cancer_seq = as.character(cancer_seq), stringsAsFactors = F)
+  
+  
+  
+  snpeff_combine_map_uni_piu (ptm_domain_filename = ptm_domain_filename,
+                             pc_data_name = pc_data_name,
+                             barcode_seq_df = this_barcode_seq_df,
+                             output_dir = output_dir,
+                             piu_output_filename = "piu_mapping_count.tsv",
+                             bpiu_output_filename = "bpiu_summarising_count.tsv")
+  
+  snpeff_combine_map_npc (npc_data_name = npc_data_name,
+                          barcode_seq_df = this_barcode_seq_df,
+                          output_dir = output_dir,
+                          output_filename = "npc_summarising_count.tsv")
+  
+  
+  cat("Germline piu mapping finished!","\n")
+  
+  
+  
+}
+  
+  
+  
+  
+  
+  ## ok now do it for the somatic part 
+  
+  
+  
+  
+  
 
