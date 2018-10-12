@@ -77,9 +77,11 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
 
     system(paste0("mkdir ", output_dir))
     
-    
-    
-    combine_chr_data(dir_to_combine = output_dir,
+     # extraction_dir = "/data/ginny/tcga_pancan/germline_raw_process/gbm_snpeff_type_muts/"
+     # quality_filter = 30
+     # output_dir = "/data/ginny/tcga_pancan/germline_raw_process/GBM_snpeff_annotation/"
+     # 
+    combine_chr_data(dir_to_combine = extraction_dir,
                      quality_filter = quality_filter,
                      dir_for_output = output_dir,
                      output_name = "snpeff_variant_anno_combine.tsv")
