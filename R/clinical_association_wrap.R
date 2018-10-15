@@ -27,7 +27,7 @@ univariate_cox_model_for_piu = function(piu_filename,
 {
   
   
-  system(paste0("mkdir ", output_dir))
+  #system(paste0("mkdir ", output_dir))
   
   
   
@@ -76,7 +76,7 @@ univariate_cox_model_for_gene_level_summary_count = function(gene_level_count_fi
                                                              output_name)
   
 {
-  system(paste0("mkdir ", output_dir))
+  #system(paste0("mkdir ", output_dir))
   
   
   gene_level_unite = gene_level_counts_clinical_unite (gene_level_count_filename = gene_level_count_filename, 
@@ -143,12 +143,24 @@ multivariate_cox_model_with_interaction = function(somatic_piu_filename,
                                                    output_dir,
                                                    output_name)
 {
+  # 
+  # somatic_piu_filename = "/data/ginny/tcga_pancan/THCA_somatic/THCA_summarise_mutation/piu_mapping_count.tsv"
+  # germline_piu_filename = "/data/ginny/tcga_pancan/germline_raw_process/THCA_summarise_mutation/piu_mapping_count.tsv"
+  # somatic_bpiu_filename = "/data/ginny/tcga_pancan/THCA_somatic/THCA_summarise_mutation/bpiu_summarising_count.tsv"
+  # germline_bpiu_filename = "/data/ginny/tcga_pancan/germline_raw_process/THCA_summarise_mutation/bpiu_summarising_count.tsv"
+  # germline_npc_filename = "/data/ginny/tcga_pancan/germline_raw_process/THCA_summarise_mutation/npc_summarising_count.tsv"
+  # patient_info_df = patient_info
+  # patient_outcome_df = patient_outcome
+  # piu_of_interest = "domain"
+  # row_sum_min = 1
+  # output_dir = "/data/ginny/tcga_pancan/THCA_somatic/cox_model/"
+  # output_name = "mutlivariate_interaction_model.tsv"
+  # 
+  # 
   
   
-  system(paste0("mkdir ", output_dir))
   
-  
-  somatic_piu_unite = piu_counts_clinical_unite (piu_count_filename = somatic_piu_filename,
+   somatic_piu_unite = piu_counts_clinical_unite (piu_count_filename = somatic_piu_filename,
                                                  patient_info_df = patient_info_df,
                                                  patient_outcome_df = patient_outcome_df,
                                                  piu_of_interest = piu_of_interest,
@@ -230,6 +242,104 @@ germline_npc_unite = gene_level_counts_clinical_unite(gene_level_count_filename 
   
   
   
+
+
+
+multivariate_cox_model_with_interaction_no_gender = function(somatic_piu_filename,
+                                                   germline_piu_filename,
+                                                   somatic_bpiu_filename,
+                                                   germline_bpiu_filename,
+                                                   germline_npc_filename,
+                                                   patient_info_df,
+                                                   patient_outcome_df,
+                                                   piu_of_interest,
+                                                   row_sum_min,
+                                                   output_dir,
+                                                   output_name)
+{
+  
+  somatic_piu_unite = piu_counts_clinical_unite (piu_count_filename = somatic_piu_filename,
+                                                 patient_info_df = patient_info_df,
+                                                 patient_outcome_df = patient_outcome_df,
+                                                 piu_of_interest = piu_of_interest,
+                                                 row_sum_min = row_sum_min)
+  
+  germline_npc_unite = gene_level_counts_clinical_unite(gene_level_count_filename = germline_npc_filename,
+                                                        quiry_gene_id = unique(somatic_piu_unite[[4]]),
+                                                        patient_info_df = patient_info,
+                                                        patient_outcome_df = patient_outcome,
+                                                        row_sum_min = row_sum_min)
+  
+  
+  
+  summarise_piu_towards_gene(piu_filename = germline_piu_filename,
+                             piu_of_interest = "domain",
+                             output_dir = output_dir,
+                             output_name = "germline_domain_mapping_gene_level_count.tsv")
+  
+  germline_domain_gene_level_filename = paste0(output_dir, "germline_domain_mapping_gene_level_count.tsv")
+  
+  summarise_piu_towards_gene(piu_filename = germline_piu_filename,
+                             piu_of_interest = "ptm",
+                             output_dir = output_dir,
+                             output_name = "germline_ptm_mapping_gene_level_count.tsv")
+  
+  germline_ptm_gene_level_filename = paste0(output_dir, "germline_ptm_mapping_gene_level_count.tsv")
+  
+  
+  germline_domain_gene_level_unite = gene_level_counts_clinical_unite(gene_level_count_filename = germline_domain_gene_level_filename,
+                                                                      quiry_gene_id = somatic_piu_unite[[4]],
+                                                                      patient_info_df = patient_info,
+                                                                      patient_outcome_df = patient_outcome,
+                                                                      row_sum_min = row_sum_min)
+  
+  
+  germline_ptm_gene_level_unite = gene_level_counts_clinical_unite(gene_level_count_filename = germline_ptm_gene_level_filename,
+                                                                   quiry_gene_id = somatic_piu_unite[[4]],
+                                                                   patient_info_df = patient_info,
+                                                                   patient_outcome_df = patient_outcome,
+                                                                   row_sum_min = row_sum_min)
+  
+  
+  germline_bpiu_unite = gene_level_counts_clinical_unite(gene_level_count_filename = germline_bpiu_filename,
+                                                         quiry_gene_id = somatic_piu_unite[[4]],
+                                                         patient_info_df = patient_info_df,
+                                                         patient_outcome_df = patient_outcome_df,
+                                                         row_sum_min = row_sum_min)
+  
+  somatic_bpiu_unite = gene_level_counts_clinical_unite(gene_level_count_filename = somatic_bpiu_filename,
+                                                        quiry_gene_id = somatic_piu_unite[[4]],
+                                                        patient_info_df = patient_info_df,
+                                                        patient_outcome_df = patient_outcome_df,
+                                                        row_sum_min = row_sum_min)
+  
+  fit_survival_model_with_bpiu_germline_no_gender(interest_variable_info = somatic_piu_unite[[3]],
+                                        unite_data = somatic_piu_unite[[1]],
+                                        piu_gene_df = somatic_piu_unite[[2]],
+                                        germline_domain_gene_level_count = germline_domain_gene_level_unite[[1]],
+                                        germline_ptm_gene_level_count = germline_ptm_gene_level_unite[[1]],
+                                        germline_npc_count = germline_npc_unite[[1]],
+                                        germline_bpiu_count = germline_bpiu_unite[[1]],
+                                        somatic_bpiu_count = somatic_bpiu_unite[[1]],
+                                        output_dir = output_dir,
+                                        output_name = "somatic_domain_with_bpiu_germline_piu_npc.tsv")
+  
+  
+  
+  cat("Multivariate model on with interaction fitted!", "\n")
+  
+  
+}
+
+
+
+
+
+
+
+
+
+
   
   
   

@@ -3,14 +3,7 @@ select_cancer_mc3 = function(mc3_filename, cancer_barcode, output_dir, output_na
   
   
 {
-  # 
-  # mc3_filename ="/data/ginny/tcga_pancan/important_files/mc3_info.tsv" 
-  # cancer_barcode = stad_barcode
-  # output_dir = "/data/ginny/tcga_pancan/stad_somatic/"
-  # output_name = "stad_somatic_mc3.tsv"
-  # 
-  # 
-  
+   
   mc3 = fread(mc3_filename, stringsAsFactors = F)
   
   sel_mc3 = mc3 %>%
@@ -20,8 +13,6 @@ select_cancer_mc3 = function(mc3_filename, cancer_barcode, output_dir, output_na
                     Variant_Classification, Variant_Type, HGVSc, HGVSp) %>%
     dplyr::summarise(agg_sample_id = paste(barcode, collapse = "_"), mut_freq = n()) %>%
     dplyr::arrange(desc(mut_freq))
-  
-  
   
   write.table(sel_mc3, paste0(output_dir, output_name),
               quote = F, row.names = F, sep = "\t")
@@ -39,8 +30,6 @@ divide_somatic_to_pc_npc = function(mc3_data_name,
                                     npc_output_name)
 {
   
-  
-  #mc3_data_name = "/data/ginny/tcga_pancan/stad_somatic/stad_somatic_mc3.tsv"
   mc3_data = fread(mc3_data_name, stringsAsFactors = F)
   
   pc_data = mc3_data %>%
@@ -78,8 +67,6 @@ annotate_mc3_pc_position_info= function(pc_data_name,
                                         output_name)
 {
   
-  
-  pc_data_name = "/data/ginny/tcga_pancan/stad_somatic/stad_somatic_mc3_pc.tsv"
   
   pc_data = fread(pc_data_name, stringsAsFactors = F)
   
@@ -148,13 +135,7 @@ mc3_map_uni_piu = function(ptm_domain_filename,
   
   
 {
-  # ptm_domain_filename = "/data/ginny/tcga_pancan/important_files/ptm_domain_combine_df.tsv"
-  # pc_data_name ="/data/ginny/tcga_pancan/stad_somatic/stad_somatic_exon_position.tsv"
-  # cancer_barcode = stad_barcode
-  # output_dir = "/data/ginny/tcga_pancan/stad_somatic/stad_summarise_mutation/"
-  # piu_output_filename = "piu_mapping_count.tsv"
-  # bpiu_output_filename = "bpiu_summarising_count.tsv"
-  
+
   pc_mut = fread(pc_data_name, stringsAsFactors = F)
   piu = fread(ptm_domain_filename, stringsAsFactors = F)%>%
     na.omit()
@@ -176,14 +157,10 @@ mc3_map_uni_piu = function(ptm_domain_filename,
       
     {
       
-      # x=  1
-      
       this_prot = unique_prot[x]
       this_prot_piu = piu%>%
         dplyr::filter(gene_id == this_prot)
-      
-      
-      
+
       count_piu_matrix = matrix(0, nrow = nrow(this_prot_piu), ncol = length(unique_sample))
       colnames(count_piu_matrix) = unique_sample
       
@@ -232,8 +209,6 @@ mc3_map_uni_piu = function(ptm_domain_filename,
     bpiu_df = rbindlist(lapply(1:length(unique_prot), function(x)
       
     {
-      
-      # x=  1
       
       this_prot = unique_prot[x]
       this_prot_piu = piu%>%

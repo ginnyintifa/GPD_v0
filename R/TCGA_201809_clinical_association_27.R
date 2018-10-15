@@ -42,7 +42,7 @@ piu_counts_clinical_unite = function(piu_count_filename,
   
   piu_matrix = t(as.matrix(piu_count_sel[,which_barcode]))
   
-  piu_count = data.frame(barcode = colnames(piu_count_sel)[12:454],
+  piu_count = data.frame(barcode = colnames(piu_count_sel)[which_barcode],
                          piu_matrix,
                          stringsAsFactors = F)
   
@@ -318,17 +318,20 @@ fit_survival_model_with_germline = function(interest_variable_info,
     dplyr::select(one_of(interest_variable_info))
   
   germline_ptm_count_psort = surv_patient_df %>%
-    dplyr::left_join(germline_ptm_gene_level_count, by = "barcode")
+    dplyr::left_join(germline_ptm_gene_level_count, by = "barcode") %>%
+    replace(is.na(.), 0)
 
   
   germline_domain_count_psort = surv_patient_df %>%
-    dplyr::left_join(germline_domain_gene_level_count, by = "barcode")
+    dplyr::left_join(germline_domain_gene_level_count, by = "barcode") %>%
+    replace(is.na(.), 0)
   
   
   
   
   germline_npc_count_psort = surv_patient_df %>%
-    dplyr::left_join(germline_npc_count, by = "barcode")
+    dplyr::left_join(germline_npc_count, by = "barcode") %>%
+    replace(is.na(.), 0)
   
   
   
@@ -469,19 +472,20 @@ fit_survival_model_with_bpiu_germline = function(interest_variable_info,
                                             output_name)
 {
   
-  # interest_variable_info = stad_somatic_domain_unite[[3]]
-  # unite_data = stad_somatic_domain_unite[[1]]
-  # piu_gene_df = stad_somatic_domain_unite[[2]]
-  # germline_domain_gene_level_count = stad_germline_domain_gene_level_unite[[1]]
-  # germline_ptm_gene_level_count = stad_germline_ptm_gene_level_unite[[1]]
-  # germline_npc_count = stad_germline_npc_unite[[1]]
-  # germline_bpiu_count = stad_germline_bpiu_unite[[1]]
-  # somatic_bpiu_count = stad_somatic_bpiu_unite[[1]]
-  # output_dir = "/data/ginny/tcga_pancan/stad_somatic/stad_clinical_association_27/"
+  
+  # 
+  # interest_variable_info = somatic_piu_unite[[3]]
+  # unite_data = somatic_piu_unite[[1]]
+  # piu_gene_df = somatic_piu_unite[[2]]
+  # germline_domain_gene_level_count = germline_domain_gene_level_unite[[1]]
+  # germline_ptm_gene_level_count = germline_ptm_gene_level_unite[[1]]
+  # germline_npc_count = germline_npc_unite[[1]]
+  # germline_bpiu_count = germline_bpiu_unite[[1]]
+  # somatic_bpiu_count = somatic_bpiu_unite[[1]]
+  # output_dir = output_dir
   # output_name = "somatic_domain_with_bpiu_germline_piu_npc.tsv"
   # 
-  # 
-  survival_data = unite_data %>%
+   survival_data = unite_data %>%
     dplyr::filter(vital_status %in% c("Alive","Dead")) %>%
     dplyr::mutate(surv_status = dplyr::recode(vital_status,
                                               "Alive" = 0, 
@@ -501,31 +505,36 @@ fit_survival_model_with_bpiu_germline = function(interest_variable_info,
     dplyr::select(one_of(interest_variable_info))
   
   germline_ptm_count_psort = surv_patient_df %>%
-    dplyr::left_join(germline_ptm_gene_level_count, by = "barcode")
+    dplyr::left_join(germline_ptm_gene_level_count, by = "barcode") %>%
+    replace(is.na(.), 0)
   
   
   germline_domain_count_psort = surv_patient_df %>%
-    dplyr::left_join(germline_domain_gene_level_count, by = "barcode")
+    dplyr::left_join(germline_domain_gene_level_count, by = "barcode") %>%
+    replace(is.na(.), 0)
   
   
   
   
   germline_npc_count_psort = surv_patient_df %>%
-    dplyr::left_join(germline_npc_count, by = "barcode")
+    dplyr::left_join(germline_npc_count, by = "barcode")%>%
+    replace(is.na(.), 0)
   
   
   germline_bpiu_count_psort = surv_patient_df %>%
-    dplyr::left_join(germline_bpiu_count, by = "barcode")
+    dplyr::left_join(germline_bpiu_count, by = "barcode")%>%
+    replace(is.na(.), 0)
   
   
   somatic_bpiu_count_psort = surv_patient_df %>%
-    dplyr::left_join(somatic_bpiu_count, by = "barcode")
+    dplyr::left_join(somatic_bpiu_count, by = "barcode")%>%
+    replace(is.na(.), 0)
   
   
   int_total_surv_result_df = rbindlist(lapply(1:ncol(survival_count), function(i)
     
   {
-    # i = 1
+   # i = 1
     
     this_piu_info = colnames(survival_count)[i]
     this_gene_info = piu_gene_df %>%
@@ -621,25 +630,33 @@ fit_survival_model_with_bpiu_germline = function(interest_variable_info,
     niss = summary(no_interaction_surv_model)
     niss_coef = niss$coefficients
     
+    
+    rs =  1+ 1 +length(unique(survival_data$crace)) -1 +1
+    
+    
+    
     this_surv_result = data.frame(count_info = colnames(survival_count)[i],
                                   num_patient = sum(count_variable!=0), 
                                   num_patient_gpiu = sum(this_germline_piu!=0),
                                   num_patient_gnpc = sum(this_germline_npc!=0),
-                                  count_coeff = ss_coef[6,1], count_exp_coeff = ss_coef[6,2],count_pval = ss_coef[6,5],
-                                  gpiu_coeff = ss_coef[7,1], gpiu_exp_coeff = ss_coef[7,2],gpiu_pval = ss_coef[7,5],
-                                  gnpc_coeff = ss_coef[8,1], gnpc_exp_coeff = ss_coef[8,2],gnpc_pval = ss_coef[8,5],
-                                  gbpiu_coeff = ss_coef[9,1], gbpiu_exp_coeff = ss_coef[9,2],gbpiu_pval = ss_coef[9,5],
-                                  sbpiu_coeff = ss_coef[10,1], sbpiu_exp_coeff = ss_coef[10,2],sbpiu_pval = ss_coef[10,5],
-                                  sgpiu_coeff = ss_coef[11,1], sgpiu_exp_coeff = ss_coef[11,2],sgpiu_pval = ss_coef[11,5],
-                                  sgnpc_coeff = ss_coef[12,1], sgnpc_exp_coeff = ss_coef[12,2],sgnpc_pval = ss_coef[12,5],
-                                  sgbpiu_coeff = ss_coef[13,1], sgbpiu_exp_coeff = ss_coef[13,2],sgbpiu_pval = ss_coef[13,5],
-                                  ssbpiu_coeff = ss_coef[14,1], ssbpiu_exp_coeff = ss_coef[14,2],ssbpiu_pval = ss_coef[14,5],
-                                  NIcount_coeff = niss_coef[6,1], NIcount_exp_coeff = niss_coef[6,2],NIcount_pval = niss_coef[6,5],
-                                  NIgpiu_coeff = niss_coef[7,1], NIgpiu_exp_coeff = niss_coef[7,2],NIgpiu_pval = niss_coef[7,5],
-                                  NIgnpc_coeff = niss_coef[8,1], NIgnpc_exp_coeff = niss_coef[8,2],NIgnpc_pval = niss_coef[8,5],
-                                  NIgbpiu_coeff = niss_coef[9,1], NIgbpiu_exp_coeff = niss_coef[9,2],NIgbpiu_pval = niss_coef[9,5],
-                                  NIsbpiu_coeff = niss_coef[10,1], NIsbpiu_exp_coeff = niss_coef[10,2],NIsbpiu_pval = niss_coef[10,5],
+                                  count_coeff = ss_coef[rs,1], count_exp_coeff = ss_coef[rs,2],count_pval = ss_coef[rs,5],
+                                  gpiu_coeff = ss_coef[rs+1,1], gpiu_exp_coeff = ss_coef[rs+1,2],gpiu_pval = ss_coef[rs+1,5],
+                                  gnpc_coeff = ss_coef[rs+2,1], gnpc_exp_coeff = ss_coef[rs+2,2],gnpc_pval = ss_coef[rs+2,5],
+                                  gbpiu_coeff = ss_coef[rs+3,1], gbpiu_exp_coeff = ss_coef[rs+3,2],gbpiu_pval = ss_coef[rs+3,5],
+                                  sbpiu_coeff = ss_coef[rs+4,1], sbpiu_exp_coeff = ss_coef[rs+4,2],sbpiu_pval = ss_coef[rs+4,5],
+                                  sgpiu_coeff = ss_coef[rs+5,1], sgpiu_exp_coeff = ss_coef[rs+5,2],sgpiu_pval = ss_coef[rs+5,5],
+                                  sgnpc_coeff = ss_coef[rs+6,1], sgnpc_exp_coeff = ss_coef[rs+6,2],sgnpc_pval = ss_coef[rs+6,5],
+                                  sgbpiu_coeff = ss_coef[rs+7,1], sgbpiu_exp_coeff = ss_coef[rs+7,2],sgbpiu_pval = ss_coef[rs+7,5],
+                                  ssbpiu_coeff = ss_coef[rs+8,1], ssbpiu_exp_coeff = ss_coef[rs+8,2],ssbpiu_pval = ss_coef[rs+8,5],
+                                  NIcount_coeff = niss_coef[rs,1], NIcount_exp_coeff = niss_coef[rs,2],NIcount_pval = niss_coef[rs,5],
+                                  NIgpiu_coeff = niss_coef[rs+1,1], NIgpiu_exp_coeff = niss_coef[rs+1,2],NIgpiu_pval = niss_coef[rs+1,5],
+                                  NIgnpc_coeff = niss_coef[rs+2,1], NIgnpc_exp_coeff = niss_coef[rs+2,2],NIgnpc_pval = niss_coef[rs+2,5],
+                                  NIgbpiu_coeff = niss_coef[rs+3,1], NIgbpiu_exp_coeff = niss_coef[rs+3,2],NIgbpiu_pval = niss_coef[rs+3,5],
+                                  NIsbpiu_coeff = niss_coef[rs+4,1], NIsbpiu_exp_coeff = niss_coef[rs+4,2],NIsbpiu_pval = niss_coef[rs+4,5],
                                   stringsAsFactors = F)
+    
+    
+    
     
     if(i%%100 == 0)
       cat(i, "\n")
@@ -677,6 +694,242 @@ fit_survival_model_with_bpiu_germline = function(interest_variable_info,
   
 }
 
+
+
+###
+
+
+fit_survival_model_with_bpiu_germline_no_gender = function(interest_variable_info,
+                                                 unite_data,
+                                                 piu_gene_df,
+                                                 germline_domain_gene_level_count,
+                                                 germline_ptm_gene_level_count,
+                                                 germline_npc_count,
+                                                 somatic_bpiu_count,
+                                                 germline_bpiu_count,
+                                                 output_dir,
+                                                 output_name)
+{
+  
+  # interest_variable_info = stad_somatic_domain_unite[[3]]
+  # unite_data = stad_somatic_domain_unite[[1]]
+  # piu_gene_df = stad_somatic_domain_unite[[2]]
+  # germline_domain_gene_level_count = stad_germline_domain_gene_level_unite[[1]]
+  # germline_ptm_gene_level_count = stad_germline_ptm_gene_level_unite[[1]]
+  # germline_npc_count = stad_germline_npc_unite[[1]]
+  # germline_bpiu_count = stad_germline_bpiu_unite[[1]]
+  # somatic_bpiu_count = stad_somatic_bpiu_unite[[1]]
+  # output_dir = "/data/ginny/tcga_pancan/stad_somatic/stad_clinical_association_27/"
+  # output_name = "somatic_domain_with_bpiu_germline_piu_npc.tsv"
+  # 
+  # 
+  survival_data = unite_data %>%
+    dplyr::filter(vital_status %in% c("Alive","Dead")) %>%
+    dplyr::mutate(surv_status = dplyr::recode(vital_status,
+                                              "Alive" = 0, 
+                                              "Dead" = 1 ))
+  
+  surv_patient_df = data.frame(barcode = survival_data$barcode, stringsAsFactors = F)
+  
+  
+  get_age = as.numeric(survival_data$age)
+ # get_gender = relevel(as.factor(survival_data$gender), ref = "MALE")
+  get_race = relevel(as.factor(survival_data$crace), ref = "WHITE")
+  
+  surv_object = Surv(time = survival_data$surv_time, event =  survival_data$surv_status)
+  
+  
+  survival_count = survival_data %>%
+    dplyr::select(one_of(interest_variable_info))
+  
+  germline_ptm_count_psort = surv_patient_df %>%
+    dplyr::left_join(germline_ptm_gene_level_count, by = "barcode") %>%
+    replace(is.na(.),0)
+  
+  
+  germline_domain_count_psort = surv_patient_df %>%
+    dplyr::left_join(germline_domain_gene_level_count, by = "barcode") %>%
+    replace(is.na(.), 0)
+  
+  
+  
+  
+  germline_npc_count_psort = surv_patient_df %>%
+    dplyr::left_join(germline_npc_count, by = "barcode") %>%
+    replace(is.na(.), 0)
+  
+  
+  germline_bpiu_count_psort = surv_patient_df %>%
+    dplyr::left_join(germline_bpiu_count, by = "barcode") %>%
+    replace(is.na(.), 0)
+  
+  
+  somatic_bpiu_count_psort = surv_patient_df %>%
+    dplyr::left_join(somatic_bpiu_count, by = "barcode") %>%
+    replace(is.na(.), 0)
+  
+  
+  int_total_surv_result_df = rbindlist(lapply(1:ncol(survival_count), function(i)
+    
+  {
+    # i = 1
+    
+    this_piu_info = colnames(survival_count)[i]
+    this_gene_info = piu_gene_df %>%
+      dplyr::filter(piu_info == this_piu_info) %>%
+      dplyr::select(gene_info) %>%
+      unique()
+    
+    if(this_gene_info$gene_info %in% colnames(germline_ptm_count_psort))
+    {
+      
+      this_gene_germline_ptm = germline_ptm_count_psort %>%
+        dplyr::select(this_gene_info$gene_info)
+      this_germline_ptm = this_gene_germline_ptm[,1]
+    }else{
+      this_germline_ptm = rep(0, nrow(germline_ptm_count_psort))
+    }
+    
+    
+    if(this_gene_info$gene_info %in% colnames(germline_domain_count_psort))
+    {
+      
+      this_gene_germline_domain = germline_domain_count_psort %>%
+        dplyr::select(this_gene_info$gene_info)
+      this_germline_domain = this_gene_germline_domain[,1]
+    }else{
+      this_germline_domain = rep(0, nrow(germline_domain_count_psort))
+    }
+    
+    
+    if(this_gene_info$gene_info %in% colnames(germline_npc_count_psort))
+    {
+      
+      this_gene_germline_npc = germline_npc_count_psort %>%
+        dplyr::select(this_gene_info$gene_info)
+      this_germline_npc = this_gene_germline_npc[,1]
+    }else{
+      this_germline_npc = rep(0, nrow(germline_npc_count_psort))
+    }
+    
+    
+    if(this_gene_info$gene_info %in% colnames(germline_bpiu_count_psort))
+    {
+      
+      this_gene_germline_bpiu = germline_bpiu_count_psort %>%
+        dplyr::select(this_gene_info$gene_info)
+      this_germline_bpiu = this_gene_germline_bpiu[,1]
+    }else{
+      this_germline_bpiu = rep(0, nrow(germline_bpiu_count_psort))
+    }
+    
+    
+    if(this_gene_info$gene_info %in% colnames(somatic_bpiu_count_psort))
+    {
+      
+      this_gene_somatic_bpiu = somatic_bpiu_count_psort %>%
+        dplyr::select(this_gene_info$gene_info)
+      this_somatic_bpiu = this_gene_somatic_bpiu[,1]
+    }else{
+      this_somatic_bpiu = rep(0, nrow(somatic_bpiu_count_psort))
+    }
+    
+    
+    count_variable = survival_count[,i]
+    
+    
+    this_germline_piu = this_germline_ptm + this_germline_domain
+    
+    
+    
+    surv_model = coxph(surv_object ~  get_age +  get_race+ 
+                         count_variable +
+                         this_germline_piu +
+                         this_germline_npc +
+                         this_germline_bpiu +
+                         this_somatic_bpiu +
+                         count_variable*this_germline_piu +
+                         count_variable*this_germline_npc +
+                         count_variable*this_germline_bpiu +
+                         count_variable*this_somatic_bpiu 
+    )
+    
+    
+    no_interaction_surv_model = coxph(surv_object ~  get_age  + get_race+ 
+                                        count_variable +
+                                        this_germline_piu +
+                                        this_germline_npc +
+                                        this_germline_bpiu +
+                                        this_somatic_bpiu)
+    
+    ss = summary(surv_model)
+    ss_coef = ss$coefficients
+    
+    niss = summary(no_interaction_surv_model)
+    niss_coef = niss$coefficients
+    
+    
+    ### count the number of rows before the counting variable 
+    # , age, race(level)
+    rs = 1+ length(unique(survival_data$crace)) -1 +1
+    
+    
+    
+    this_surv_result = data.frame(count_info = colnames(survival_count)[i],
+                                  num_patient = sum(count_variable!=0), 
+                                  num_patient_gpiu = sum(this_germline_piu!=0),
+                                  num_patient_gnpc = sum(this_germline_npc!=0),
+                                  count_coeff = ss_coef[rs,1], count_exp_coeff = ss_coef[rs,2],count_pval = ss_coef[rs,5],
+                                  gpiu_coeff = ss_coef[rs+1,1], gpiu_exp_coeff = ss_coef[rs+1,2],gpiu_pval = ss_coef[rs+1,5],
+                                  gnpc_coeff = ss_coef[rs+2,1], gnpc_exp_coeff = ss_coef[rs+2,2],gnpc_pval = ss_coef[rs+2,5],
+                                  gbpiu_coeff = ss_coef[rs+3,1], gbpiu_exp_coeff = ss_coef[rs+3,2],gbpiu_pval = ss_coef[rs+3,5],
+                                  sbpiu_coeff = ss_coef[rs+4,1], sbpiu_exp_coeff = ss_coef[rs+4,2],sbpiu_pval = ss_coef[rs+4,5],
+                                  sgpiu_coeff = ss_coef[rs+5,1], sgpiu_exp_coeff = ss_coef[rs+5,2],sgpiu_pval = ss_coef[rs+5,5],
+                                  sgnpc_coeff = ss_coef[rs+6,1], sgnpc_exp_coeff = ss_coef[rs+6,2],sgnpc_pval = ss_coef[rs+6,5],
+                                  sgbpiu_coeff = ss_coef[rs+7,1], sgbpiu_exp_coeff = ss_coef[rs+7,2],sgbpiu_pval = ss_coef[rs+7,5],
+                                  ssbpiu_coeff = ss_coef[rs+8,1], ssbpiu_exp_coeff = ss_coef[rs+8,2],ssbpiu_pval = ss_coef[rs+8,5],
+                                  NIcount_coeff = niss_coef[rs,1], NIcount_exp_coeff = niss_coef[rs,2],NIcount_pval = niss_coef[rs,5],
+                                  NIgpiu_coeff = niss_coef[rs+1,1], NIgpiu_exp_coeff = niss_coef[rs+1,2],NIgpiu_pval = niss_coef[rs+1,5],
+                                  NIgnpc_coeff = niss_coef[rs+2,1], NIgnpc_exp_coeff = niss_coef[rs+2,2],NIgnpc_pval = niss_coef[rs+2,5],
+                                  NIgbpiu_coeff = niss_coef[rs+3,1], NIgbpiu_exp_coeff = niss_coef[rs+3,2],NIgbpiu_pval = niss_coef[rs+3,5],
+                                  NIsbpiu_coeff = niss_coef[rs+4,1], NIsbpiu_exp_coeff = niss_coef[rs+4,2],NIsbpiu_pval = niss_coef[rs+4,5],
+                                  stringsAsFactors = F)
+    
+    if(i%%100 == 0)
+      cat(i, "\n")
+    
+    return(this_surv_result)
+    
+    
+    
+  }))
+  
+  
+  
+  
+  
+  
+  q_val = qvalue(int_total_surv_result_df$count_pval)
+  # bq_val = qvalue(int_total_surv_result_df$bcount_pval)
+  
+  
+  niq_val = qvalue(int_total_surv_result_df$NIcount_pval)
+  #bniq_val = qvalue(int_total_surv_result_df$bNIcount_pval)
+  
+  
+  surv_df = int_total_surv_result_df %>%
+    dplyr::mutate(count_qval = q_val$qvalues,
+                  # bcount_qval =bq_val$qvalues,
+                  NIcount_qval = niq_val$qvalues)%>%
+    #bNIcount_qval = bniq_val$qvalues) %>%
+    dplyr::arrange(desc(num_patient)) %>%
+    replace(is.na(.), "")
+  
+  write.table(surv_df,paste0(output_dir, output_name),
+              quote = F,row.names = F, sep = "\t")
+  
+  
+}
 
 
 

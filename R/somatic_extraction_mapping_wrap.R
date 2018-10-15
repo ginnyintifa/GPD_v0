@@ -29,11 +29,8 @@ somatic_extraction_annotation_pos = function(mc3_info_file,
                                              output_dir)
 {
   
-  system(paste0("mkdir ", output_dir))
-  
-  
   select_cancer_mc3(mc3_filename = mc3_info_file ,
-                    cancer_barcode = stad_barcode,
+                    cancer_barcode = cancer_barcode,
                     output_dir = output_dir,
                     output_name = paste0(cancer_type,"_somatic_mc3.tsv"))
   
@@ -91,8 +88,6 @@ somatic_piu_mapping = function (ptm_domain_filename,
                                  output_dir)
   
 {
-  
-  system(paste0("mkdir ", output_dir))
   
   
   mc3_map_uni_piu (ptm_domain_filename = ptm_domain_filename,
