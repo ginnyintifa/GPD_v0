@@ -52,10 +52,6 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
   snpeff_output_file_names = list.files(raw_snpeff_output_dir)
   
   
-
-  
- # chr_name = c(seq(1:22),"X","Y")
-  
   for(t in 1:length(chr_name))
   {
     
@@ -72,27 +68,15 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
   }
   
     
-    #combine_chr_data_output_dir = paste0(original_dir,cancer_type,"_snpeff_annotation/")
-
-
-     # extraction_dir = "/data/ginny/tcga_pancan/germline_raw_process/gbm_snpeff_type_muts/"
-     # quality_filter = 30
-     # output_dir = "/data/ginny/tcga_pancan/germline_raw_process/GBM_snpeff_annotation/"
-     # 
     combine_chr_data(dir_to_combine = extraction_dir,
                      quality_filter = quality_filter,
                      dir_for_output = output_dir,
                      output_name = "snpeff_variant_anno_combine.tsv")
-    
-    
-    
+
     divide_germline_to_pc_npc(combine_data_name = paste0(output_dir,"snpeff_variant_anno_combine.tsv"),
                               output_dir = output_dir,
                               pc_output_name = "snpeff_variant_anno_pc.tsv",
                               npc_output_name = "snpeff_variant_anno_npc.tsv")
-    
-    
-    
     
     annotate_snpeff_combine_pc_position_info(pc_data_name = paste0(output_dir, "snpeff_variant_anno_pc.tsv"),
                                              output_dir = output_dir,
@@ -103,15 +87,6 @@ germline_extraction_annotation_pos = function(raw_snpeff_output_dir,
  cat("Germline extraction and annotation finished!","\n")
  
 }
-
-
-
-
-# next function is to wrap up the mapping part using function from this dir 
-
-## YES SO FAR SO GOOD 
-
-
 
 
 
@@ -178,13 +153,3 @@ germline_piu_mapping = function (ptm_domain_filename,
 }
   
   
-  
-  
-  
-  ## ok now do it for the somatic part 
-  
-  
-  
-  
-  
-

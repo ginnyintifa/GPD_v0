@@ -117,8 +117,6 @@ snpeff_record_whole_mutation_in_cancer = function(all_names, chr,
     {
       row_col =   parse_row_col(ts[x], tr, tc)
       
-      # rc_df = data.frame(mut_row = row_col[1], sample_col = row_col[2], stringsAsFactors = F)
-      
       return(row_col)
       
     }))
