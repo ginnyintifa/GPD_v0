@@ -30,7 +30,7 @@
 univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
                                                       piu_filename,
                                                       cdr_clinical,
-                                                      race_group_min = 6，
+                                                      race_group_min = 6,
                                                       min_surv_days = 30,
                                                       row_sum_min = 1,
                                                       mutation_type = "somatic",
