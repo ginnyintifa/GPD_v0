@@ -5,7 +5,7 @@
 \title{Map soamtic pc to piu and bpiu, summarise bpiu and npc per gene}
 \usage{
 somatic_piu_mapping(ptm_domain_filename, pc_data_name, npc_data_name,
-  cancer_barcode, output_dir)
+  cancer_barcode, locus_level_mut_min = 2, output_dir)
 }
 \arguments{
 \item{ptm_domain_filename}{The file provided by the package where the piu information is recorded.}
@@ -16,16 +16,16 @@ somatic_piu_mapping(ptm_domain_filename, pc_data_name, npc_data_name,
 
 \item{cancer_barcode}{TCGA barcodes for this cancer type cohort.}
 
-\item{output_dir}{The directory you would like to have your output files in.}
+\item{locus_level_mut_min}{This minimum frequency for selecting mutations on locus level.}
 
-\item{sample_cn_id}{A barcode codebook provided by the packge.}
+\item{output_dir}{The directory you would like to have your output files in.}
 }
 \description{
 This function generates three files as the final products. First, each piu mapped, second, bpiu summarised per gene, third, 
 npc summarised per gene.
 }
 \examples{
-germline_piu_mapping (ptm_domain_filename =  "/data/ginny/tcga_pancan/important_files/ptm_domain_combine_df.tsv",
+somatic_piu_mapping (ptm_domain_filename =  "/data/ginny/tcga_pancan/important_files/ptm_domain_combine_df.tsv",
                      pc_data_name  = 
                        "/data/ginny/tcga_pancan/germline_raw_process/STAD_snpeff_annotation/snpeff_variant_anno_pc_pos.tsv",
                      npc_data_name = 
