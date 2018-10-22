@@ -3,51 +3,93 @@
 #' Build univariate cox regression model with confounders adjusted (age, gender, race)
 #' 
 #' This function generates one file as the result, the coefficients and significance level estimated for the model.
-#' 
+#' @param locus_filename The name of the file containing locus of interest. 
 #' @param piu_filename The name of the file containing PIU of interest. 
-#' @param patient_info_df The dataframe containing patient baseline information.
-#' @param patient_outcome_df The dataframe containing survival information.
+#' @param cdr_clinical The cdr clinical data for the cancer type of interest.
+#' @param race_group_min The minimum number of people to be grouped to a race group for model fitting purpose.
+#' @param min_surv_days The minimum number of days only above which the associated patient is selected for model building.
+#' @param row_sum_min The minimum number of total occurrence for each PIU.
 #' @param mutation_type Somatic or germline mutation, default is "somatic".
 #' @param piu_of_interest Domain or PTM sites as the PIU of interest, default is "domain".
-#' @param row_sum_min The minimum number of total occurrence for each PIU.
 #' @param output_dir The directory you would like to have your output files in.
 #' @import dplyr magrittr data.table survival qvalue
 #' @export
 #' @details 
 #' @examples 
+#'univariate_cox_model_for_somatic_locus_piu(locus_filename = "/data/ginny/tcga_pancan/STAD_somatic/STAD_summarise_mutation/stad_mc3_count_matrix.tsv",
+#'                                           piu_filename = "/data/ginny/tcga_pancan/STAD_somatic/STAD_summarise_mutation/piu_mapping_count.tsv",
+#'                                           cdr_clinical = stad_cdr,
+#'                                           race_group_min = 6,
+#'                                           min_surv_days = 30,
+#'                                           row_sum_min = 1,
+#'                                           mutation_type = "somatic",
+#'                                           piu_of_interest = "domain",
+#'                                           output_dir = "/data/ginny/tcga_pancan/STAD_somatic/cox_model/")
 
 
-univariate_cox_model_for_piu = function(piu_filename,
-                                patient_info_df,
-                                patient_outcome_df,
-                                mutation_type = "somatic",
-                                piu_of_interest = "domain",
-                                row_sum_min = 1,
-                                output_dir)
+univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
+                                                      piu_filename,
+                                                      cdr_clinical,
+                                                      race_group_min = 6
+                                                      min_surv_days = 30,
+                                                      row_sum_min = 1,
+                                                      mutation_type = "somatic",
+                                                      piu_of_interest = "domain",
+                                                      output_dir)
 {
   
   
-  #system(paste0("mkdir ", output_dir))
+  locus_unite = locus_counts_cdr_clinical_unite (
+    locus_count_filename = locus_filename,
+    cdr_clinical = cdr_clinical,
+    row_sum_min = row_sum_min,
+    output_dir =  output_dir,
+    output_name = paste0(mutation_type, "_locus_level_cdr_clinical_unite.tsv"))
+  
+  locus_info = cdr_tidy_up_for_model(
+    interest_variable_info = locus_unite[[2]],
+    unite_data = locus_unite[[1]],
+    race_group_min = race_group_min,
+    output_dir = output_dir,
+    output_name = paste0(mutation_type, "_locus_level_survival_info.tsv"))
   
   
+  fit_survival_model(
+    surv_info_data = locus_info,
+    interest_variable_info = locus_unite[[2]],
+    min_surv_time = min_surv_time,
+    output_dir =  output_dir,
+    output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
   
-  piu_unite = piu_counts_clinical_unite (piu_count_filename = piu_filename,
-                                                 patient_info_df = patient_info_df,
-                                                 patient_outcome_df = patient_outcome_df,
-                                                 piu_of_interest = piu_of_interest,
-                                                 row_sum_min = row_sum_min)
   
-  fit_survival_model(interest_variable_info = piu_unite[[3]],
-                     unite_data = piu_unite[[1]],
-                     output_dir = output_dir,
-                     output_name = paste0(mutation_type, "_",piu_of_interest,"_univariate_cox.tsv"))
+  piu_unite = piu_counts_cdr_clinical_unite(
+    piu_count_filename = piu_filename,
+    cdr_clinical = cdr_clinical,
+    piu_of_interest = piu_of_interest,
+    row_sum_min = row_sum_min,
+    output_dir = output_dir,
+    output_name = paste0(mutation_type,"_" piu_of_interest, "_cdr_clinical_unite.tsv")
   
- 
-  cat("Univariate model on piu fitted!", "\n")
+  piu_info = cdr_tidy_up_for_model(
+    interest_variable_info = piu_unite[[3]],
+    unite_data = piu_unite[[1]],
+    race_group_min = race_group_min,
+    output_dir = output_dir,
+    output_name = paste0(mutation_type,"_" piu_of_interest, "_survival_info.tsv"))
+  
+  
+  fit_survival_model(
+    surv_info_data = piu_info,
+    interest_variable_info = piu_unite[[3]],
+    min_surv_time = min_surv_time,
+    output_dir = output_dir,
+    output_name = paste0(mutation_type,"_" piu_of_interest, "_cdr_univariate_piu.tsv"))
   
 
+  cat("Univariate model on locus and piu fitted!", "\n")
+  
+  
 }
-
 
 
 
