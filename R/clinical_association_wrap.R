@@ -68,14 +68,14 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
     piu_of_interest = piu_of_interest,
     row_sum_min = row_sum_min,
     output_dir = output_dir,
-    output_name = paste0(mutation_type,"_" piu_of_interest, "_cdr_clinical_unite.tsv")
+    output_name = paste0(mutation_type,"_" ,piu_of_interest, "_cdr_clinical_unite.tsv")
   
   piu_info = cdr_tidy_up_for_model(
     interest_variable_info = piu_unite[[3]],
     unite_data = piu_unite[[1]],
     race_group_min = race_group_min,
     output_dir = output_dir,
-    output_name = paste0(mutation_type,"_" piu_of_interest, "_survival_info.tsv"))
+    output_name = paste0(mutation_type,"_", piu_of_interest, "_survival_info.tsv"))
   
   
   fit_survival_model(
@@ -83,7 +83,7 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
     interest_variable_info = piu_unite[[3]],
     min_surv_time = min_surv_time,
     output_dir = output_dir,
-    output_name = paste0(mutation_type,"_" piu_of_interest, "_cdr_univariate_piu.tsv"))
+    output_name = paste0(mutation_type,"_" ,piu_of_interest, "_cdr_univariate_piu.tsv"))
   
 
   cat("Univariate model on locus and piu fitted!", "\n")
