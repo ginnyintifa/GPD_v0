@@ -56,7 +56,7 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
   fit_survival_model(
     surv_info_data = locus_info,
     interest_variable_info = locus_unite[[2]],
-    min_surv_time = min_surv_time,
+    min_surv_time = min_surv_days,
     output_dir =  output_dir,
     output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
   
@@ -83,7 +83,7 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
   fit_survival_model(
     surv_info_data = piu_info,
     interest_variable_info = piu_unite[[3]],
-    min_surv_time = min_surv_time,
+    min_surv_time = min_surv_days,
     output_dir = output_dir,
     output_name = paste0(mutation_type,"_", piu_of_interest, "_cdr_univariate_piu.tsv"))
   
