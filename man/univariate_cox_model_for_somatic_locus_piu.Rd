@@ -6,7 +6,7 @@
 \usage{
 univariate_cox_model_for_somatic_locus_piu(locus_filename, piu_filename,
   cdr_clinical, gender_as_covariate = T, race_group_min = 6,
-  min_surv_days = 30, min_surv_people = 5, row_sum_min = 1,
+  min_surv_days = 30, min_surv_people = 5, row_sum_min = 2,
   mutation_type = "somatic", piu_of_interest = "domain", output_dir)
 }
 \arguments{

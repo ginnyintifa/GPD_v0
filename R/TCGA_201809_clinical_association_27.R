@@ -26,7 +26,7 @@ piu_counts_cdr_clinical_unite = function(piu_count_filename,
     dplyr::filter(unit_label == piu_of_interest)%>%
     dplyr::mutate(piu_info = paste(uniprot_accession, start_position,end_position, unit_name, gene_name, gene_id, sep = "_"))%>%
     dplyr::mutate(gene_info = paste(gene_name, gene_id,sep = "_"))%>%
-    dplyr::filter(row_sum >= row_sum_min) %>%
+    dplyr::filter(row_sum > row_sum_min) %>%
     dplyr::select(uniprot_accession, start_position, end_position, unit_name, gene_name, gene_id, unit_label,gene_info, piu_info, row_sum,
                   everything())
   
@@ -109,7 +109,7 @@ locus_counts_cdr_clinical_unite = function(locus_count_filename,
                        stringsAsFactors = F)
   
   locus_count_sel = locus_count_df%>%
-    dplyr::filter(row_sum >= row_sum_min)
+    dplyr::filter(row_sum > row_sum_min)
     
   #piu_info = piu_count_sel$piu_info
   
