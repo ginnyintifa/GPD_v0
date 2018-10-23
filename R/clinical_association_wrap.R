@@ -8,6 +8,7 @@
 #' @param cdr_clinical The cdr clinical data for the cancer type of interest.
 #' @param race_group_min The minimum number of people to be grouped to a race group for model fitting purpose.
 #' @param min_surv_days The minimum number of days only above which the associated patient is selected for model building.
+#' @param min_surv_people The minimum number of people on both alive and deceased sides.
 #' @param row_sum_min The minimum number of total occurrence for each PIU.
 #' @param mutation_type Somatic or germline mutation, default is "somatic".
 #' @param piu_of_interest Domain or PTM sites as the PIU of interest, default is "domain".
@@ -21,6 +22,7 @@
 #'                                           cdr_clinical = stad_cdr,
 #'                                           race_group_min = 6,
 #'                                           min_surv_days = 30,
+#'                                           min_surv_people = 5,
 #'                                           row_sum_min = 1,
 #'                                           mutation_type = "somatic",
 #'                                           piu_of_interest = "domain",
@@ -30,14 +32,26 @@
 univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
                                                       piu_filename,
                                                       cdr_clinical,
+                                                      gender_as_covariate = T,
                                                       race_group_min = 6,
                                                       min_surv_days = 30,
+                                                      min_surv_people = 5,
                                                       row_sum_min = 1,
                                                       mutation_type = "somatic",
                                                       piu_of_interest = "domain",
                                                       output_dir)
 {
   
+  # locus_filename = "/data/ginny/tcga_pancan/GBM_somatic/GBM_summarise_mutation/mc3_count_matrix.tsv"
+  # piu_filename = "/data/ginny/tcga_pancan/GBM_somatic/GBM_summarise_mutation/piu_mapping_count.tsv"
+  # cdr_clinical = gbm_cdr
+  # race_group_min = 6
+  # min_surv_days = 30
+  # row_sum_min = 1
+  # mutation_type = "somatic"
+  # piu_of_interest = "domain"
+  # output_dir = "/data/ginny/tcga_pancan/GBM_somatic/cox_model/"
+  # 
   
   locus_unite = locus_counts_cdr_clinical_unite (
     locus_count_filename = locus_filename,
@@ -53,12 +67,27 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
     output_dir = output_dir,
     output_name = paste0(mutation_type, "_locus_level_survival_info.tsv"))
   
-  fit_survival_model(
-    surv_info_data = locus_info,
-    interest_variable_info = locus_unite[[2]],
-    min_surv_time = min_surv_days,
-    output_dir =  output_dir,
-    output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
+  if(gender_as_covariate == T)
+  {
+    fit_survival_model(
+      surv_info_data = locus_info,
+      interest_variable_info = locus_unite[[2]],
+      min_surv_time = min_surv_days,
+      min_surv_people = min_surv_people,
+      output_dir =  output_dir,
+      output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
+    
+  }else{
+    fit_survival_model_no_gender(
+      surv_info_data = locus_info,
+      interest_variable_info = locus_unite[[2]],
+      min_surv_time = min_surv_days,
+      min_surv_people = min_surv_people,
+      output_dir =  output_dir,
+      output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
+    
+  }
+  
   
   
   cat("1/2...univariate Cox regression model on locus level counts fitted!", "\n")
@@ -80,13 +109,26 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
     output_dir = output_dir,
     output_name = paste0(mutation_type,"_", piu_of_interest, "_survival_info.tsv"))
   
-  fit_survival_model(
-    surv_info_data = piu_info,
-    interest_variable_info = piu_unite[[3]],
-    min_surv_time = min_surv_days,
-    output_dir = output_dir,
-    output_name = paste0(mutation_type,"_", piu_of_interest, "_cdr_univariate_piu.tsv"))
-  
+   if(gender_as_covariate == T)
+   {
+     fit_survival_model(
+       surv_info_data = piu_info,
+       interest_variable_info = piu_unite[[3]],
+       min_surv_time = min_surv_days,
+       min_surv_people = min_surv_people,
+       output_dir = output_dir,
+       output_name = paste0(mutation_type,"_", piu_of_interest, "_cdr_univariate_piu.tsv"))
+     
+   }else{
+     fit_survival_model_no_gender(
+       surv_info_data = piu_info,
+       interest_variable_info = piu_unite[[3]],
+       min_surv_time = min_surv_days,
+       min_surv_people = min_surv_people,
+       output_dir = output_dir,
+       output_name = paste0(mutation_type,"_", piu_of_interest, "_cdr_univariate_piu.tsv"))
+   }
+ 
   cat("2/2...univariate Cox regression model on PIU level counts fitted!", "\n")
   
   cat("Univariate Cox regression models fitted!", "\n")

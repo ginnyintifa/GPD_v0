@@ -5,9 +5,9 @@
 \title{Build univariate cox regression model with confounders adjusted (age, gender, race)}
 \usage{
 univariate_cox_model_for_somatic_locus_piu(locus_filename, piu_filename,
-  cdr_clinical, race_group_min = 6, min_surv_days = 30,
-  row_sum_min = 1, mutation_type = "somatic",
-  piu_of_interest = "domain", output_dir)
+  cdr_clinical, gender_as_covariate = T, race_group_min = 6,
+  min_surv_days = 30, min_surv_people = 5, row_sum_min = 1,
+  mutation_type = "somatic", piu_of_interest = "domain", output_dir)
 }
 \arguments{
 \item{locus_filename}{The name of the file containing locus of interest.}
@@ -19,6 +19,8 @@ univariate_cox_model_for_somatic_locus_piu(locus_filename, piu_filename,
 \item{race_group_min}{The minimum number of people to be grouped to a race group for model fitting purpose.}
 
 \item{min_surv_days}{The minimum number of days only above which the associated patient is selected for model building.}
+
+\item{min_surv_people}{The minimum number of people on both alive and deceased sides.}
 
 \item{row_sum_min}{The minimum number of total occurrence for each PIU.}
 
@@ -37,6 +39,7 @@ univariate_cox_model_for_somatic_locus_piu(locus_filename = "/data/ginny/tcga_pa
                                           cdr_clinical = stad_cdr,
                                           race_group_min = 6,
                                           min_surv_days = 30,
+                                          min_surv_people = 5,
                                           row_sum_min = 1,
                                           mutation_type = "somatic",
                                           piu_of_interest = "domain",

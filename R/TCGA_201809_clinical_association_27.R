@@ -338,21 +338,32 @@ cdr_tidy_up_for_model = function(interest_variable_info, unite_data, race_group_
 }
   
 
+
+### the four end points may not be all meaningful 
+### some does not have enough data 
+### so in this case I need a choosing procedure 
+
+
 fit_survival_model = function(surv_info_data,
                               interest_variable_info,
                               min_surv_time,
+                              min_surv_people,
                               output_dir,
                               output_name)
   
 {
   
-  # surv_info_data = stad_somatic_domain_info
-  # interest_variable_info = stad_somatic_domain_unite[[3]]
-  # min_surv_time = 30
-  # output_dir = "/data/ginny/tcga_pancan/stad_somatic/stad_clinical_association_27/"
-  # output_name = "cdr_univariate_somatic_domain.tsv"
+  # surv_info_data = locus_info
+  # interest_variable_info = locus_unite[[2]]
+  # min_surv_time = min_surv_days
+  # min_surv_people = 5
+  # output_dir =  output_dir
+  # output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv")
+  # 
   
-  # I get relevent df for different end point 
+### I should set a variable as a flag to indicate the inclusion of the 4 endpoints
+  
+  endpoint_flag = data.frame(OS = T, DSS = T, DFI = T, PFI = T, stringsAsFactors = F)
   
   os_surv_data = surv_info_data %>%
     dplyr::select(barcode, age, gender, os_race, OS, OS.time) %>%
@@ -360,123 +371,189 @@ fit_survival_model = function(surv_info_data,
     dplyr::arrange(OS, OS.time) %>%
     dplyr::filter(OS.time >= min_surv_time)
   
-  os_age = as.numeric(os_surv_data$age)
-  os_gender = relevel(as.factor(os_surv_data$gender), ref = "MALE")
-  os_race = relevel(as.factor(os_surv_data$os_race), ref = "WHITE")
-  
-  os_surv_object = Surv(time = os_surv_data$OS.time, event =  os_surv_data$OS)
-  
+  os_surv_table = as.data.frame(table(os_surv_data$OS))
+  if(min(os_surv_table$Freq)<min_surv_people)
+  {
+    endpoint_flag$OS = F
+  }else{
+    os_age = as.numeric(os_surv_data$age)
+    os_gender = relevel(as.factor(os_surv_data$gender), ref = unique(os_surv_data$gender)[1])
+    os_race = relevel(as.factor(os_surv_data$os_race), ref = unique(os_surv_data$os_race)[1])
+    os_surv_object = Surv(time = os_surv_data$OS.time, event =  os_surv_data$OS)
+  }
   ###
   dss_surv_data = surv_info_data %>%
     dplyr::select(barcode, age, gender, dss_race, DSS, DSS.time) %>%
     na.omit() %>%
     dplyr::arrange(DSS, DSS.time)%>%
     dplyr::filter(DSS.time >= min_surv_time)
+  dss_surv_table = as.data.frame(table(dss_surv_data$DSS))
   
+  if(min(dss_surv_table$Freq)<min_surv_people)
+  {
+    endpoint_flag$DSS = F
+  }else{
   dss_age = as.numeric(dss_surv_data$age)
-  dss_gender = relevel(as.factor(dss_surv_data$gender), ref = "MALE")
-  dss_race = relevel(as.factor(dss_surv_data$dss_race), ref = "WHITE")
-  
+  dss_gender = relevel(as.factor(dss_surv_data$gender), ref = unique(dss_surv_data$gender)[1])
+  dss_race = relevel(as.factor(dss_surv_data$dss_race), ref = unique(dss_surv_data$dss_race)[1])
   dss_surv_object = Surv(time = dss_surv_data$DSS.time, event =  dss_surv_data$DSS)
-  
+  }
   ###
   dfi_surv_data = surv_info_data %>%
     dplyr::select(barcode, age, gender, dfi_race, DFI, DFI.time) %>%
     na.omit() %>%
     dplyr::arrange(DFI, DFI.time)%>%
     dplyr::filter(DFI.time >= min_surv_time)
-  
+  dfi_surv_table = as.data.frame(table(dfi_surv_data$DFI))
+  if(min(dfi_surv_table$Freq)<min_surv_people)
+  {
+    endpoint_flag$DFI = F
+  }else{
   dfi_age = as.numeric(dfi_surv_data$age)
-  dfi_gender = relevel(as.factor(dfi_surv_data$gender), ref = "MALE")
-  dfi_race = relevel(as.factor(dfi_surv_data$dfi_race), ref = "WHITE")
-  
+  dfi_gender = relevel(as.factor(dfi_surv_data$gender), ref = unique(dfi_surv_data$gender)[1] )
+  dfi_race = relevel(as.factor(dfi_surv_data$dfi_race), ref = unique(dfi_surv_data$dfi_race)[1])
   dfi_surv_object = Surv(time = dfi_surv_data$DFI.time, event =  dfi_surv_data$DFI)
-  
+  }
   ###
+  
   pfi_surv_data = surv_info_data %>%
     dplyr::select(barcode, age, gender, pfi_race, PFI, PFI.time) %>%
     na.omit() %>%
     dplyr::arrange(PFI, PFI.time)%>%
     dplyr::filter(PFI.time >= min_surv_time)
-  
+  pfi_surv_table = as.data.frame(table(pfi_surv_data$PFI))
+  if(min(pfi_surv_table$Freq)<min_surv_people)
+  {
+    endpoint_flag$PFI = F
+  }else{
   pfi_age = as.numeric(pfi_surv_data$age)
-  pfi_gender = relevel(as.factor(pfi_surv_data$gender), ref = "MALE")
-  pfi_race = relevel(as.factor(pfi_surv_data$pfi_race), ref = "WHITE")
-  
+  pfi_gender = relevel(as.factor(pfi_surv_data$gender), ref = unique(pfi_surv_data$gender)[1])
+  pfi_race = relevel(as.factor(pfi_surv_data$pfi_race), ref = unique(pfi_surv_data$pfi_race)[1])
   pfi_surv_object = Surv(time = pfi_surv_data$PFI.time, event =  pfi_surv_data$PFI)
+  }
   
   
+  #####
   
   surv_result_df = rbindlist(lapply(1:length(interest_variable_info), function(i)
   {
     #i = 1
+    
     this_count_df = surv_info_data %>%
       dplyr::select(barcode, one_of(interest_variable_info[i]))
     
+    ###
     os_count = os_surv_data %>%
       dplyr::left_join(this_count_df, by = "barcode")
     
-    os_model = coxph(os_surv_object ~  os_age + os_gender + os_race+ 
-                         os_count[,7])   
-    ### above, need to be careful about this 7
-
-    os = summary(os_model)
-    os_coef = os$coefficients
-    r_os = 2+length(unique(os_race))
+    num_patients_os = sum(os_count[,7]!=0)
+    total_patients_os = nrow(os_count)
+    count_coeff_os = NA
+    count_exp_coeff_os = NA
+    count_pval_os = NA
     
+    if(endpoint_flag$OS == T)
+    {
+      
+      os_model = coxph(os_surv_object ~  os_age + os_gender + os_race+ 
+                         os_count[,7])   
+
+      os = summary(os_model)
+      os_coef = os$coefficients
+      r_os = 2+length(unique(os_race))
+      
+      count_coeff_os = os_coef[r_os,1]
+      count_exp_coeff_os = os_coef[r_os,2]
+      count_pval_os = os_coef[r_os,5]
+      
+    }
+    
+  
     ###
     
     dss_count = dss_surv_data %>%
       dplyr::left_join(this_count_df, by = "barcode")
     
-    dss_model = coxph(dss_surv_object ~  dss_age + dss_gender + dss_race+ 
-                       dss_count[,7])   
+    num_patients_dss = sum(dss_count[,7]!=0)
+    total_patients_dss = nrow(dss_count)
+    count_coeff_dss = NA
+    count_exp_coeff_dss = NA
+    count_pval_dss = NA
     
-    dss = summary(dss_model)
-    dss_coef = dss$coefficients
-    r_dss = 2+length(unique(dss_race))
+    if(endpoint_flag$DSS == T)
+    {
+      dss_model = coxph(dss_surv_object ~  dss_age + dss_gender + dss_race+ 
+                          dss_count[,7])   
+      dss = summary(dss_model)
+      dss_coef = dss$coefficients
+      r_dss = 2+length(unique(dss_race))
+      count_coeff_dss = dss_coef[r_dss,1]
+      count_exp_coeff_dss = dss_coef[r_dss,2]
+      count_pval_dss = dss_coef[r_dss,5]
+    }
     
     ###
     
     dfi_count = dfi_surv_data %>%
       dplyr::left_join(this_count_df, by = "barcode")
     
-    dfi_model = coxph(dfi_surv_object ~  dfi_age + dfi_gender + dfi_race+ 
-                        dfi_count[,7])   
-    dfi = summary(dfi_model)
-    dfi_coef = dfi$coefficients
-    r_dfi = 2+length(unique(dfi_race))
+    num_patients_dfi = sum(dfi_count[,7]!=0)
+    total_patients_dfi = nrow(dfi_count)
+    count_coeff_dfi = NA
+    count_exp_coeff_dfi = NA
+    count_pval_dfi = NA
     
+    if(endpoint_flag$DFI == T)
+    {
+      dfi_model = coxph(dfi_surv_object ~  dfi_age + dfi_gender + dfi_race+ 
+                          dfi_count[,7])   
+      dfi = summary(dfi_model)
+      dfi_coef = dfi$coefficients
+      r_dfi = 2+length(unique(dfi_race))
+      
+      count_coeff_dfi = dfi_coef[r_dfi,1]
+      count_exp_coeff_dfi = dfi_coef[r_dfi,2]
+      count_pval_dfi = dfi_coef[r_dfi,5]
+    }
+      
     ###
+    
     
     pfi_count = pfi_surv_data %>%
       dplyr::left_join(this_count_df, by = "barcode")
     
-    pfi_model = coxph(pfi_surv_object ~  pfi_age + pfi_gender + pfi_race+ 
-                        pfi_count[,7])   
-    pfi = summary(pfi_model)
-    pfi_coef = pfi$coefficients
-    r_pfi = 2+length(unique(pfi_race))
+    num_patients_pfi = sum(pfi_count[,7]!=0)
+    total_patients_pfi = nrow(pfi_count)
+    count_coeff_pfi = NA
+    count_exp_coeff_pfi = NA
+    count_pval_pfi = NA
+    
+    if(endpoint_flag$PFI == T)
+    {
+      pfi_model = coxph(pfi_surv_object ~  pfi_age + pfi_gender + pfi_race+ 
+                          pfi_count[,7])   
+      pfi = summary(pfi_model)
+      pfi_coef = pfi$coefficients
+      r_pfi = 2+length(unique(pfi_race))
+      
+      count_coeff_pfi = pfi_coef[r_pfi,1]
+      count_exp_coeff_pfi = pfi_coef[r_pfi,2]
+      count_pval_pfi = pfi_coef[r_pfi,5]
+  
+    }
     
     
     
     this_surv_result = data.frame(count_info = interest_variable_info[i],
-                                  num_patients_os = sum(os_count[,7]!=0),
-                                  total_patients_os = nrow(os_count),
-                                  count_coeff_os = os_coef[r_os,1], count_exp_coeff_os = os_coef[r_os,2],
-                                  count_pval_os = os_coef[r_os,5],
-                                  num_patients_dss = sum(dss_count[,7]!=0),
-                                  total_patients_dss = nrow(dss_count),
-                                  count_coeff_dss = dss_coef[r_dss,1], count_exp_coeff_dss = dss_coef[r_dss,2],
-                                  count_pval_dss = dss_coef[r_dss,5],
-                                  num_patients_dfi = sum(dfi_count[,7]!=0),
-                                  total_patients_dfi = nrow(dfi_count),
-                                  count_coeff_dfi = dfi_coef[r_dfi,1], count_exp_coeff_dfi = dfi_coef[r_dfi,2],
-                                  count_pval_dfi = dfi_coef[r_dfi,5],
-                                  num_patients_pfi = sum(pfi_count[,7]!=0),
-                                  total_patients_pfi = nrow(pfi_count),
-                                  count_coeff_pfi = pfi_coef[r_pfi,1], count_exp_coeff_pfi = pfi_coef[r_pfi,2],
-                                  count_pval_pfi = pfi_coef[r_pfi,5],
+                                  num_patients_os,total_patients_os,
+                                  count_coeff_os, count_exp_coeff_os,count_pval_os,
+                                  num_patients_dss, total_patients_dss,
+                                  count_coeff_dss , count_exp_coeff_dss,count_pval_dss ,
+                                  num_patients_dfi,total_patients_dfi,
+                                  count_coeff_dfi, count_exp_coeff_dfi,count_pval_dfi,
+                                  num_patients_pfi,total_patients_pfi,
+                                  count_coeff_pfi, count_exp_coeff_pfi,count_pval_pfi,
+                                  count_qval_os = NA,count_qval_dss = NA,count_qval_dfi = NA,count_qval_pfi = NA,
                                   stringsAsFactors = F)
     
     if(i%%100 == 0 )
@@ -488,34 +565,65 @@ fit_survival_model = function(surv_info_data,
   
   
   # q_val = p.adjust(surv_result_df$count_pval,method = "BH")
+  ## prevent truncated p value distribution 
   
   
-  os_qval = qvalue(surv_result_df$count_pval_os)
-  dss_qval = qvalue(surv_result_df$count_pval_dss)
-  dfi_qval = qvalue(surv_result_df$count_pval_dfi)
-  pfi_qval = qvalue(surv_result_df$count_pval_pfi)
+  if(endpoint_flag$OS == T)
+  {
+    if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os)<0.05 & max(surv_result_df$count_pval_os)>0.95)
+    {
+      os_qval = qvalue(surv_result_df$count_pval_os)
+    }else{
+      os_qval = qvalue(surv_result_df$count_pval_os, pi0 = 1)
+      
+    }
+    surv_result_df$count_qval_os = os_qval$qvalues
+    
+  }
+  if(endpoint_flag$DSS == T)
+  {  
+    if(length(surv_result_df$count_pval_dss)>300&min(surv_result_df$count_pval_dss)<0.05 & max(surv_result_df$count_pval_dss)>0.95)
+    {
+      dss_qval = qvalue(surv_result_df$count_pval_dss)
+    }else{
+      dss_qval = qvalue(surv_result_df$count_pval_dss, pi0 = 1)
+    }
+    surv_result_df$count_qval_dss = dss_qval$qvalues
+  }
+  if(endpoint_flag$DFI == T)
+  {
+    if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi)<0.05 & max(surv_result_df$count_pval_dfi)>0.95)
+    {
+      dfi_qval = qvalue(surv_result_df$count_pval_dfi)
+    }else{
+      dfi_qval = qvalue(surv_result_df$count_pval_dfi, pi0 = 1)
+    }
+    surv_result_df$count_qval_dfi = dfi_qval$qvalues
+  }
+  if(endpoint_flag$PFI == T)
+  {
+    if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi)<0.05 & max(surv_result_df$count_pval_pfi)>0.95)
+    {
+      pfi_qval = qvalue(surv_result_df$count_pval_pfi)
+    }else{
+      pfi_qval = qvalue(surv_result_df$count_pval_pfi, pi0 = 1)
+      
+    }
+    surv_result_df$count_qval_pfi = pfi_qval$qvalues
+  }
+  
   
   
   surv_df = surv_result_df %>%
-    dplyr::mutate(count_qval_os = os_qval$qvalues) %>%
-    dplyr::mutate(count_qval_dss = dss_qval$qvalues) %>%
-    dplyr::mutate(count_qval_dfi = dfi_qval$qvalues) %>%
-    dplyr::mutate(count_qval_pfi = pfi_qval$qvalues) %>%
-    na.omit()%>%
-    dplyr::arrange(desc(num_patients_os)) 
+    dplyr::arrange(desc(num_patients_os)) %>%
+    replace(is.na(.),"")
   
-  
-  
-  #}
   
   write.table(surv_df, paste0(output_dir, output_name),
               quote = F, row.names = F, sep = "\t")
   
   
 }
-
-
-
 
 
 
@@ -526,18 +634,23 @@ fit_survival_model = function(surv_info_data,
 fit_survival_model_no_gender = function(surv_info_data,
                               interest_variable_info,
                               min_surv_time,
+                              min_surv_people,
                               output_dir,
                               output_name)
   
 {
   
-  # surv_info_data = stad_somatic_domain_info
-  # interest_variable_info = stad_somatic_domain_unite[[3]]
-  # min_surv_time = 30
-  # output_dir = "/data/ginny/tcga_pancan/stad_somatic/stad_clinical_association_27/"
-  # output_name = "cdr_univariate_somatic_domain.tsv"
+  # surv_info_data = locus_info
+  # interest_variable_info = locus_unite[[2]]
+  # min_surv_time = min_surv_days
+  # min_surv_people = 5
+  # output_dir =  output_dir
+  # output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv")
+  # 
   
-  # I get relevent df for different end point 
+  ### I should set a variable as a flag to indicate the inclusion of the 4 endpoints
+  
+  endpoint_flag = data.frame(OS = T, DSS = T, DFI = T, PFI = T, stringsAsFactors = F)
   
   os_surv_data = surv_info_data %>%
     dplyr::select(barcode, age, gender, os_race, OS, OS.time) %>%
@@ -545,119 +658,189 @@ fit_survival_model_no_gender = function(surv_info_data,
     dplyr::arrange(OS, OS.time) %>%
     dplyr::filter(OS.time >= min_surv_time)
   
-  os_age = as.numeric(os_surv_data$age)
-  os_race = relevel(as.factor(os_surv_data$os_race), ref = "WHITE")
-  
-  os_surv_object = Surv(time = os_surv_data$OS.time, event =  os_surv_data$OS)
-  
+  os_surv_table = as.data.frame(table(os_surv_data$OS))
+  if(min(os_surv_table$Freq)<min_surv_people)
+  {
+    endpoint_flag$OS = F
+  }else{
+    os_age = as.numeric(os_surv_data$age)
+    os_gender = relevel(as.factor(os_surv_data$gender), ref = unique(os_surv_data$gender)[1])
+    os_race = relevel(as.factor(os_surv_data$os_race), ref = unique(os_surv_data$os_race)[1])
+    os_surv_object = Surv(time = os_surv_data$OS.time, event =  os_surv_data$OS)
+  }
   ###
   dss_surv_data = surv_info_data %>%
-    dplyr::select(barcode, age, gender, dss_race, DSS, DSS.time) %>%
+    dplyr::select(barcode, age, gender,dss_race, DSS, DSS.time) %>%
     na.omit() %>%
     dplyr::arrange(DSS, DSS.time)%>%
     dplyr::filter(DSS.time >= min_surv_time)
+  dss_surv_table = as.data.frame(table(dss_surv_data$DSS))
   
-  dss_age = as.numeric(dss_surv_data$age)
-  dss_race = relevel(as.factor(dss_surv_data$dss_race), ref = "WHITE")
-  
-  dss_surv_object = Surv(time = dss_surv_data$DSS.time, event =  dss_surv_data$DSS)
-  
+  if(min(dss_surv_table$Freq)<min_surv_people)
+  {
+    endpoint_flag$DSS = F
+  }else{
+    dss_age = as.numeric(dss_surv_data$age)
+    dss_gender = relevel(as.factor(dss_surv_data$gender), ref = unique(dss_surv_data$gender)[1])
+    dss_race = relevel(as.factor(dss_surv_data$dss_race), ref = unique(dss_surv_data$dss_race)[1])
+    dss_surv_object = Surv(time = dss_surv_data$DSS.time, event =  dss_surv_data$DSS)
+  }
   ###
   dfi_surv_data = surv_info_data %>%
-    dplyr::select(barcode, age, gender, dfi_race, DFI, DFI.time) %>%
+    dplyr::select(barcode, age, gender,dfi_race, DFI, DFI.time) %>%
     na.omit() %>%
     dplyr::arrange(DFI, DFI.time)%>%
     dplyr::filter(DFI.time >= min_surv_time)
-  
-  dfi_age = as.numeric(dfi_surv_data$age)
-  dfi_race = relevel(as.factor(dfi_surv_data$dfi_race), ref = "WHITE")
-  
-  dfi_surv_object = Surv(time = dfi_surv_data$DFI.time, event =  dfi_surv_data$DFI)
-  
+  dfi_surv_table = as.data.frame(table(dfi_surv_data$DFI))
+  if(min(dfi_surv_table$Freq)<min_surv_people)
+  {
+    endpoint_flag$DFI = F
+  }else{
+    dfi_age = as.numeric(dfi_surv_data$age)
+    dfi_gender = relevel(as.factor(dfi_surv_data$gender), ref = unique(dfi_surv_data$gender)[1] )
+    dfi_race = relevel(as.factor(dfi_surv_data$dfi_race), ref = unique(dfi_surv_data$dfi_race)[1])
+    dfi_surv_object = Surv(time = dfi_surv_data$DFI.time, event =  dfi_surv_data$DFI)
+  }
   ###
+  
   pfi_surv_data = surv_info_data %>%
-    dplyr::select(barcode, age, gender, pfi_race, PFI, PFI.time) %>%
+    dplyr::select(barcode, age, gender,pfi_race, PFI, PFI.time) %>%
     na.omit() %>%
     dplyr::arrange(PFI, PFI.time)%>%
     dplyr::filter(PFI.time >= min_surv_time)
+  pfi_surv_table = as.data.frame(table(pfi_surv_data$PFI))
+  if(min(pfi_surv_table$Freq)<min_surv_people)
+  {
+    endpoint_flag$PFI = F
+  }else{
+    pfi_age = as.numeric(pfi_surv_data$age)
+    pfi_gender = relevel(as.factor(pfi_surv_data$gender), ref = unique(pfi_surv_data$gender)[1])
+    pfi_race = relevel(as.factor(pfi_surv_data$pfi_race), ref = unique(pfi_surv_data$pfi_race)[1])
+    pfi_surv_object = Surv(time = pfi_surv_data$PFI.time, event =  pfi_surv_data$PFI)
+  }
   
-  pfi_age = as.numeric(pfi_surv_data$age)
-  pfi_race = relevel(as.factor(pfi_surv_data$pfi_race), ref = "WHITE")
   
-  pfi_surv_object = Surv(time = pfi_surv_data$PFI.time, event =  pfi_surv_data$PFI)
-  
-  
+  #####
   
   surv_result_df = rbindlist(lapply(1:length(interest_variable_info), function(i)
   {
     #i = 1
+    
     this_count_df = surv_info_data %>%
       dplyr::select(barcode, one_of(interest_variable_info[i]))
     
+    ###
     os_count = os_surv_data %>%
       dplyr::left_join(this_count_df, by = "barcode")
     
-    os_model = coxph(os_surv_object ~  os_age + os_race+ 
-                       os_count[,7])   
-    ### above, need to be careful about this 7
+    num_patients_os = sum(os_count[,7]!=0)
+    total_patients_os = nrow(os_count)
+    count_coeff_os = NA
+    count_exp_coeff_os = NA
+    count_pval_os = NA
     
-    os = summary(os_model)
-    os_coef = os$coefficients
-    r_os = 1+length(unique(os_race))
+    if(endpoint_flag$OS == T)
+    {
+      
+      os_model = coxph(os_surv_object ~  os_age  + os_race+ 
+                         os_count[,7])   
+      
+      os = summary(os_model)
+      os_coef = os$coefficients
+      r_os = 1+length(unique(os_race))
+      
+      count_coeff_os = os_coef[r_os,1]
+      count_exp_coeff_os = os_coef[r_os,2]
+      count_pval_os = os_coef[r_os,5]
+      
+    }
+    
     
     ###
     
     dss_count = dss_surv_data %>%
       dplyr::left_join(this_count_df, by = "barcode")
     
-    dss_model = coxph(dss_surv_object ~  dss_age +  dss_race+ 
-                        dss_count[,7])   
+    num_patients_dss = sum(dss_count[,7]!=0)
+    total_patients_dss = nrow(dss_count)
+    count_coeff_dss = NA
+    count_exp_coeff_dss = NA
+    count_pval_dss = NA
     
-    dss = summary(dss_model)
-    dss_coef = dss$coefficients
-    r_dss = 1+length(unique(dss_race))
+    if(endpoint_flag$DSS == T)
+    {
+      dss_model = coxph(dss_surv_object ~  dss_age  + dss_race+ 
+                          dss_count[,7])   
+      dss = summary(dss_model)
+      dss_coef = dss$coefficients
+      r_dss = 1+length(unique(dss_race))
+      count_coeff_dss = dss_coef[r_dss,1]
+      count_exp_coeff_dss = dss_coef[r_dss,2]
+      count_pval_dss = dss_coef[r_dss,5]
+    }
     
     ###
     
     dfi_count = dfi_surv_data %>%
       dplyr::left_join(this_count_df, by = "barcode")
     
-    dfi_model = coxph(dfi_surv_object ~  dfi_age + dfi_race+ 
-                        dfi_count[,7])   
-    dfi = summary(dfi_model)
-    dfi_coef = dfi$coefficients
-    r_dfi = 1+length(unique(dfi_race))
+    num_patients_dfi = sum(dfi_count[,7]!=0)
+    total_patients_dfi = nrow(dfi_count)
+    count_coeff_dfi = NA
+    count_exp_coeff_dfi = NA
+    count_pval_dfi = NA
+    
+    if(endpoint_flag$DFI == T)
+    {
+      dfi_model = coxph(dfi_surv_object ~  dfi_age + dfi_race+ 
+                          dfi_count[,7])   
+      dfi = summary(dfi_model)
+      dfi_coef = dfi$coefficients
+      r_dfi = 1+length(unique(dfi_race))
+      
+      count_coeff_dfi = dfi_coef[r_dfi,1]
+      count_exp_coeff_dfi = dfi_coef[r_dfi,2]
+      count_pval_dfi = dfi_coef[r_dfi,5]
+    }
     
     ###
+    
     
     pfi_count = pfi_surv_data %>%
       dplyr::left_join(this_count_df, by = "barcode")
     
-    pfi_model = coxph(pfi_surv_object ~  pfi_age +  pfi_race+ 
-                        pfi_count[,7])   
-    pfi = summary(pfi_model)
-    pfi_coef = pfi$coefficients
-    r_pfi = 1+length(unique(pfi_race))
+    num_patients_pfi = sum(pfi_count[,7]!=0)
+    total_patients_pfi = nrow(pfi_count)
+    count_coeff_pfi = NA
+    count_exp_coeff_pfi = NA
+    count_pval_pfi = NA
+    
+    if(endpoint_flag$PFI == T)
+    {
+      pfi_model = coxph(pfi_surv_object ~  pfi_age + pfi_race+ 
+                          pfi_count[,7])   
+      pfi = summary(pfi_model)
+      pfi_coef = pfi$coefficients
+      r_pfi = 1+length(unique(pfi_race))
+      
+      count_coeff_pfi = pfi_coef[r_pfi,1]
+      count_exp_coeff_pfi = pfi_coef[r_pfi,2]
+      count_pval_pfi = pfi_coef[r_pfi,5]
+      
+    }
     
     
     
     this_surv_result = data.frame(count_info = interest_variable_info[i],
-                                  num_patients_os = sum(os_count[,7]!=0),
-                                  total_patients_os = nrow(os_count),
-                                  count_coeff_os = os_coef[r_os,1], count_exp_coeff_os = os_coef[r_os,2],
-                                  count_pval_os = os_coef[r_os,5],
-                                  num_patients_dss = sum(dss_count[,7]!=0),
-                                  total_patients_dss = nrow(dss_count),
-                                  count_coeff_dss = dss_coef[r_dss,1], count_exp_coeff_dss = dss_coef[r_dss,2],
-                                  count_pval_dss = dss_coef[r_dss,5],
-                                  num_patients_dfi = sum(dfi_count[,7]!=0),
-                                  total_patients_dfi = nrow(dfi_count),
-                                  count_coeff_dfi = dfi_coef[r_dfi,1], count_exp_coeff_dfi = dfi_coef[r_dfi,2],
-                                  count_pval_dfi = dfi_coef[r_dfi,5],
-                                  num_patients_pfi = sum(pfi_count[,7]!=0),
-                                  total_patients_pfi = nrow(pfi_count),
-                                  count_coeff_pfi = pfi_coef[r_pfi,1], count_exp_coeff_pfi = pfi_coef[r_pfi,2],
-                                  count_pval_pfi = pfi_coef[r_pfi,5],
+                                  num_patients_os,total_patients_os,
+                                  count_coeff_os, count_exp_coeff_os,count_pval_os,
+                                  num_patients_dss, total_patients_dss,
+                                  count_coeff_dss , count_exp_coeff_dss,count_pval_dss ,
+                                  num_patients_dfi,total_patients_dfi,
+                                  count_coeff_dfi, count_exp_coeff_dfi,count_pval_dfi,
+                                  num_patients_pfi,total_patients_pfi,
+                                  count_coeff_pfi, count_exp_coeff_pfi,count_pval_pfi,
+                                  count_qval_os = NA,count_qval_dss = NA,count_qval_dfi = NA,count_qval_pfi = NA,
                                   stringsAsFactors = F)
     
     if(i%%100 == 0 )
@@ -669,31 +852,67 @@ fit_survival_model_no_gender = function(surv_info_data,
   
   
   # q_val = p.adjust(surv_result_df$count_pval,method = "BH")
+  ## prevent truncated p value distribution 
   
   
-  os_qval = qvalue(surv_result_df$count_pval_os)
-  dss_qval = qvalue(surv_result_df$count_pval_dss)
-  dfi_qval = qvalue(surv_result_df$count_pval_dfi)
-  pfi_qval = qvalue(surv_result_df$count_pval_pfi)
+  if(endpoint_flag$OS == T)
+  {
+    if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os)<0.05 & max(surv_result_df$count_pval_os)>0.95)
+    {
+      os_qval = qvalue(surv_result_df$count_pval_os)
+    }else{
+      os_qval = qvalue(surv_result_df$count_pval_os, pi0 = 1)
+      
+    }
+    surv_result_df$count_qval_os = os_qval$qvalues
+    
+  }
+  if(endpoint_flag$DSS == T)
+  {  
+    if(length(surv_result_df$count_pval_dss)>300&min(surv_result_df$count_pval_dss)<0.05 & max(surv_result_df$count_pval_dss)>0.95)
+    {
+      dss_qval = qvalue(surv_result_df$count_pval_dss)
+    }else{
+      dss_qval = qvalue(surv_result_df$count_pval_dss, pi0 = 1)
+    }
+    surv_result_df$count_qval_dss = dss_qval$qvalues
+  }
+  if(endpoint_flag$DFI == T)
+  {
+    if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi)<0.05 & max(surv_result_df$count_pval_dfi)>0.95)
+    {
+      dfi_qval = qvalue(surv_result_df$count_pval_dfi)
+    }else{
+      dfi_qval = qvalue(surv_result_df$count_pval_dfi, pi0 = 1)
+    }
+    surv_result_df$count_qval_dfi = dfi_qval$qvalues
+  }
+  if(endpoint_flag$PFI == T)
+  {
+    if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi)<0.05 & max(surv_result_df$count_pval_pfi)>0.95)
+    {
+      pfi_qval = qvalue(surv_result_df$count_pval_pfi)
+    }else{
+      pfi_qval = qvalue(surv_result_df$count_pval_pfi, pi0 = 1)
+      
+    }
+    surv_result_df$count_qval_pfi = pfi_qval$qvalues
+  }
+  
   
   
   surv_df = surv_result_df %>%
-    dplyr::mutate(count_qval_os = os_qval$qvalues) %>%
-    dplyr::mutate(count_qval_dss = dss_qval$qvalues) %>%
-    dplyr::mutate(count_qval_dfi = dfi_qval$qvalues) %>%
-    dplyr::mutate(count_qval_pfi = pfi_qval$qvalues) %>%
-    na.omit()%>%
-    dplyr::arrange(desc(num_patients_os)) 
+    dplyr::arrange(desc(num_patients_os)) %>%
+    replace(is.na(.),"")
   
-  
-  
-  #}
   
   write.table(surv_df, paste0(output_dir, output_name),
               quote = F, row.names = F, sep = "\t")
   
   
 }
+
+
 
 
 
