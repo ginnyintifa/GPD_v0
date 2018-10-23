@@ -41,17 +41,18 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
                                                       piu_of_interest = "domain",
                                                       output_dir)
 {
-  
-  # locus_filename = "/data/ginny/tcga_pancan/GBM_somatic/GBM_summarise_mutation/mc3_count_matrix.tsv"
-  # piu_filename = "/data/ginny/tcga_pancan/GBM_somatic/GBM_summarise_mutation/piu_mapping_count.tsv"
-  # cdr_clinical = gbm_cdr
+  # 
+  # locus_filename = "/data/ginny/tcga_pancan/STAD_somatic/STAD_summarise_mutation/mc3_count_matrix.tsv"
+  # piu_filename = "/data/ginny/tcga_pancan/STAD_somatic/STAD_summarise_mutation/piu_mapping_count.tsv"
+  # cdr_clinical = stad_cdr
+  # gender_as_covariate = T
   # race_group_min = 6
   # min_surv_days = 30
+  # min_surv_people = 5
   # row_sum_min = 2
   # mutation_type = "somatic"
   # piu_of_interest = "domain"
-  # output_dir = "/data/ginny/tcga_pancan/GBM_somatic/cox_model/"
-  
+  # output_dir = "/data/ginny/tcga_pancan/STAD_somatic/cox_model/" 
   
   locus_unite = locus_counts_cdr_clinical_unite (
     locus_count_filename = locus_filename,
