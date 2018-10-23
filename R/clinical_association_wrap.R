@@ -47,11 +47,11 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
   # cdr_clinical = gbm_cdr
   # race_group_min = 6
   # min_surv_days = 30
-  # row_sum_min = 1
+  # row_sum_min = 2
   # mutation_type = "somatic"
   # piu_of_interest = "domain"
   # output_dir = "/data/ginny/tcga_pancan/GBM_somatic/cox_model/"
-  # 
+  
   
   locus_unite = locus_counts_cdr_clinical_unite (
     locus_count_filename = locus_filename,

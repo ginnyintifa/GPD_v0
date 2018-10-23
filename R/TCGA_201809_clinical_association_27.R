@@ -266,12 +266,12 @@ cdr_tidy_up_for_model = function(interest_variable_info, unite_data, race_group_
                                  output_name)
 {
   
-  # interest_variable_info = stad_somatic_domain_unite[[3]]
-  # unite_data = stad_somatic_domain_unite[[1]]
-  # race_group_min = 6
-  # output_dir = "/data/ginny/tcga_pancan/STAD_somatic/cox_model/"
-  # output_name = "stad_somatic_domain_survival_info.tsv"
-  # 
+  # interest_variable_info = locus_unite[[2]]
+  # unite_data = locus_unite[[1]]
+  # race_group_min = 5
+  # output_dir = output_dir
+  # output_name = paste0(mutation_type, "_locus_level_survival_info.tsv")
+  
   patient_count = unite_data %>%
     dplyr::select(barcode, age_at_initial_pathologic_diagnosis,gender,one_of(interest_variable_info)) %>%
     dplyr::rename(age = age_at_initial_pathologic_diagnosis)
@@ -301,6 +301,7 @@ cdr_tidy_up_for_model = function(interest_variable_info, unite_data, race_group_
   dfi_data = unite_data %>%
     dplyr::select(barcode, race, DFI, DFI.time) %>%
     na.omit()
+  
   dfi_race_freq = as.data.frame(table(dfi_data$race))
   dfi_race_minor = dfi_race_freq %>%
     dplyr::filter(Freq<race_group_min)
@@ -316,6 +317,8 @@ cdr_tidy_up_for_model = function(interest_variable_info, unite_data, race_group_
     dplyr::filter(Freq<race_group_min)
   pfi_data$race[which(pfi_data$race %in% pfi_race_minor$Var1)] = "OTHER"
   colnames(pfi_data)[which(colnames(pfi_data)=="race")] = "pfi_race"
+  
+  
   
   
   patient_count_survival = patient_count %>%
@@ -353,16 +356,14 @@ fit_survival_model = function(surv_info_data,
   
 {
   
-  # surv_info_data = locus_info
-  # interest_variable_info = locus_unite[[2]]
-  # min_surv_time = min_surv_days
+  
+  # surv_info_data = piu_info
+  # interest_variable_info = piu_unite[[3]]
+  # min_surv_time = 30
   # min_surv_people = 5
-  # output_dir =  output_dir
-  # output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv")
-  # 
-  
-### I should set a variable as a flag to indicate the inclusion of the 4 endpoints
-  
+  # output_dir = output_dir
+  # output_name = paste0(mutation_type,"_", piu_of_interest, "_cdr_univariate_piu.tsv")
+   
   endpoint_flag = data.frame(OS = T, DSS = T, DFI = T, PFI = T, stringsAsFactors = F)
   
   os_surv_data = surv_info_data %>%
@@ -435,10 +436,11 @@ fit_survival_model = function(surv_info_data,
   
   #####
   
-  surv_result_df = rbindlist(lapply(1:length(interest_variable_info), function(i)
+ surv_result_df = rbindlist(lapply(1:length(interest_variable_info), function(i)
+      # for(i in 600:length(interest_variable_info))
   {
-    #i = 1
-    
+  #  i = 552
+
     this_count_df = surv_info_data %>%
       dplyr::select(barcode, one_of(interest_variable_info[i]))
     
@@ -570,7 +572,7 @@ fit_survival_model = function(surv_info_data,
   
   if(endpoint_flag$OS == T)
   {
-    if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os)<0.05 & max(surv_result_df$count_pval_os)>0.95)
+    if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os,na.rm = T)<0.05 & max(surv_result_df$count_pval_os,na.rm = T)>0.95)
     {
       os_qval = qvalue(surv_result_df$count_pval_os)
     }else{
@@ -580,9 +582,10 @@ fit_survival_model = function(surv_info_data,
     surv_result_df$count_qval_os = os_qval$qvalues
     
   }
+  
   if(endpoint_flag$DSS == T)
   {  
-    if(length(surv_result_df$count_pval_dss)>300&min(surv_result_df$count_pval_dss)<0.05 & max(surv_result_df$count_pval_dss)>0.95)
+    if(length(surv_result_df$count_pval_dss)>300 &min(surv_result_df$count_pval_dss,na.rm = T)<0.05 & max(surv_result_df$count_pval_dss,na.rm = T)>0.95)
     {
       dss_qval = qvalue(surv_result_df$count_pval_dss)
     }else{
@@ -590,9 +593,11 @@ fit_survival_model = function(surv_info_data,
     }
     surv_result_df$count_qval_dss = dss_qval$qvalues
   }
+  
+  
   if(endpoint_flag$DFI == T)
   {
-    if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi)<0.05 & max(surv_result_df$count_pval_dfi)>0.95)
+    if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_dfi,na.rm = T)>0.95)
     {
       dfi_qval = qvalue(surv_result_df$count_pval_dfi)
     }else{
@@ -602,7 +607,7 @@ fit_survival_model = function(surv_info_data,
   }
   if(endpoint_flag$PFI == T)
   {
-    if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi)<0.05 & max(surv_result_df$count_pval_pfi)>0.95)
+    if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_pfi,na.rm = T)>0.95)
     {
       pfi_qval = qvalue(surv_result_df$count_pval_pfi)
     }else{
@@ -857,7 +862,7 @@ fit_survival_model_no_gender = function(surv_info_data,
   
   if(endpoint_flag$OS == T)
   {
-    if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os)<0.05 & max(surv_result_df$count_pval_os)>0.95)
+    if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os,na.rm = T)<0.05 & max(surv_result_df$count_pval_os,na.rm = T)>0.95)
     {
       os_qval = qvalue(surv_result_df$count_pval_os)
     }else{
@@ -869,7 +874,7 @@ fit_survival_model_no_gender = function(surv_info_data,
   }
   if(endpoint_flag$DSS == T)
   {  
-    if(length(surv_result_df$count_pval_dss)>300&min(surv_result_df$count_pval_dss)<0.05 & max(surv_result_df$count_pval_dss)>0.95)
+    if(length(surv_result_df$count_pval_dss)>300&min(surv_result_df$count_pval_dss,na.rm = T)<0.05 & max(surv_result_df$count_pval_dss,na.rm = T)>0.95)
     {
       dss_qval = qvalue(surv_result_df$count_pval_dss)
     }else{
@@ -879,7 +884,7 @@ fit_survival_model_no_gender = function(surv_info_data,
   }
   if(endpoint_flag$DFI == T)
   {
-    if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi)<0.05 & max(surv_result_df$count_pval_dfi)>0.95)
+    if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_dfi,na.rm = T)>0.95)
     {
       dfi_qval = qvalue(surv_result_df$count_pval_dfi)
     }else{
@@ -889,7 +894,7 @@ fit_survival_model_no_gender = function(surv_info_data,
   }
   if(endpoint_flag$PFI == T)
   {
-    if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi)<0.05 & max(surv_result_df$count_pval_pfi)>0.95)
+    if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_pfi,na.rm = T)>0.95)
     {
       pfi_qval = qvalue(surv_result_df$count_pval_pfi)
     }else{
