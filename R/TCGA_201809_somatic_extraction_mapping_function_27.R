@@ -41,6 +41,7 @@ divide_somatic_to_pc_npc = function(mc3_data_name,
     dplyr::filter(!grepl("Silent", Variant_Classification)) %>%
     dplyr::filter(nchar(HGVSp)==1) 
   
+  ### no protein info is marked by a dot.
   
   write.table(pc_data, paste0(output_dir, pc_output_name), 
               quote = F, row.names = F, sep = "\t")

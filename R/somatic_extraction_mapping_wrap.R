@@ -33,6 +33,8 @@ somatic_extraction_annotation_pos = function(mc3_info_file,
                     cancer_barcode = cancer_barcode,
                     output_dir = output_dir,
                     output_name = paste0(cancer_type,"_somatic_mc3.tsv"))
+  cat("1/3...somatic variants for this cancer type selected.","\n")
+  
   
   this_mc3_name = paste0(output_dir, cancer_type, "_somatic_mc3.tsv")
   
@@ -40,6 +42,8 @@ somatic_extraction_annotation_pos = function(mc3_info_file,
                            output_dir = output_dir,
                            pc_output_name = paste0(cancer_type, "_somatic_mc3_pc.tsv"),
                            npc_output_name = paste0(cancer_type, "_somatic_mc3_npc.tsv"))
+  cat("2/3...somatic variants divided to PC and nPC parts.","\n")
+  
   
   this_pc_name = paste0(output_dir, cancer_type, "_somatic_mc3_pc.tsv")
   
@@ -47,7 +51,9 @@ somatic_extraction_annotation_pos = function(mc3_info_file,
                                 output_dir = output_dir,
                                 output_name = paste0(cancer_type, "_somatic_mc3_pc_pos.tsv"))
 
-  cat("Somatic extraction and annotation finished!","\n")
+  cat("3/3...protein positions for PC variants annotated.","\n")
+  
+  cat("Somatic variants extraction and annotation finished!","\n")
   
 
 }
@@ -98,6 +104,7 @@ somatic_piu_mapping = function (ptm_domain_filename,
     output_dir = output_dir,
     output_filename = "mc3_count_matrix.tsv")
   
+  cat("1/3...locus level count matrix generated.","\n")
   
   
   mc3_map_uni_piu (ptm_domain_filename = ptm_domain_filename,
@@ -106,6 +113,8 @@ somatic_piu_mapping = function (ptm_domain_filename,
                              output_dir = output_dir,
                              piu_output_filename = "piu_mapping_count.tsv",
                              bpiu_output_filename = "bpiu_summarising_count.tsv")
+  cat("2/3...PIU and bPIU count matrices generated.","\n")
+  
   
   mc3_map_npc (npc_data_name = npc_data_name,
                           cancer_barcode = cancer_barcode,
@@ -113,8 +122,9 @@ somatic_piu_mapping = function (ptm_domain_filename,
                           output_filename = "npc_summarising_count.tsv")
   
   
-  cat("Somatic piu mapping finished!","\n")
+  cat("3/3...nPC count matrix generated.","\n")
   
+  cat("Somatic PIU mapping finished!", "\n")
   
   
 }

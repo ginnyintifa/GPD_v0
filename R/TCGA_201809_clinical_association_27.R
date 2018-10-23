@@ -99,12 +99,12 @@ locus_counts_cdr_clinical_unite = function(locus_count_filename,
   
 {
   
-  locus_count_filename = "/data/ginny/tcga_pancan/STAD_somatic/STAD_summarise_mutation/stad_mc3_count_matrix.tsv"
-  cdr_clinical = stad_cdr
-  row_sum_min = 1
-  output_dir =  "/data/ginny/tcga_pancan/STAD_somatic/cox_model/"
-  output_name = "stad_locus_level_cdr_clinical_unite.tsv"
-  
+  # locus_count_filename = "/data/ginny/tcga_pancan/STAD_somatic/STAD_summarise_mutation/stad_mc3_count_matrix.tsv"
+  # cdr_clinical = stad_cdr
+  # row_sum_min = 1
+  # output_dir =  "/data/ginny/tcga_pancan/STAD_somatic/cox_model/"
+  # output_name = "stad_locus_level_cdr_clinical_unite.tsv"
+  # 
   locus_count_df = fread(locus_count_filename,
                        stringsAsFactors = F)
   
@@ -152,7 +152,7 @@ locus_counts_cdr_clinical_unite = function(locus_count_filename,
 
 
 # get the germline npc counts and clinical info united before modelling ----------------
-
+## used in generating results for point3
 gene_level_counts_cdr_clinical_unite = function(gene_level_count_filename,
                                             quiry_gene_id,
                                             cdr_clinical,
@@ -337,16 +337,6 @@ cdr_tidy_up_for_model = function(interest_variable_info, unite_data, race_group_
 
 }
   
-
-# 
-# 
-# stad_somatic_domain_info = cdr_tidy_up_for_model(
-#   interest_variable_info = stad_somatic_domain_unite[[3]],
-#   unite_data = stad_somatic_domain_unite[[1]],
-#   race_group_min = 6,
-#   output_dir = "/data/ginny/tcga_pancan/STAD_somatic/cox_model/",
-#   output_name = "stad_somatic_domain_survival_info.tsv")
-#   
 
 fit_survival_model = function(surv_info_data,
                               interest_variable_info,

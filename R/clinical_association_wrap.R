@@ -53,7 +53,6 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
     output_dir = output_dir,
     output_name = paste0(mutation_type, "_locus_level_survival_info.tsv"))
   
-  
   fit_survival_model(
     surv_info_data = locus_info,
     interest_variable_info = locus_unite[[2]],
@@ -61,6 +60,10 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
     output_dir =  output_dir,
     output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
   
+  
+  cat("1/2...univariate Cox regression model on locus level counts fitted!", "\n")
+  
+  ###
   
   piu_unite = piu_counts_cdr_clinical_unite(
     piu_count_filename = piu_filename,
@@ -84,8 +87,9 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
     output_dir = output_dir,
     output_name = paste0(mutation_type,"_", piu_of_interest, "_cdr_univariate_piu.tsv"))
   
-
-  cat("Univariate model on locus and piu fitted!", "\n")
+  cat("2/2...univariate Cox regression model on PIU level counts fitted!", "\n")
+  
+  cat("Univariate Cox regression models fitted!", "\n")
   
   
 }
