@@ -376,48 +376,69 @@ fit_survival_model = function(surv_info_data,
     dplyr::arrange(OS, OS.time) %>%
     dplyr::filter(OS.time >= min_surv_time)
   
-  os_surv_table = as.data.frame(table(os_surv_data$OS))
-  if(min(os_surv_table$Freq)<min_surv_people)
+  
+  if(nrow(os_surv_data)==0)
   {
     endpoint_flag$OS = F
+    
   }else{
-    os_age = as.numeric(os_surv_data$age)
-    os_gender = relevel(as.factor(os_surv_data$gender), ref = unique(os_surv_data$gender)[1])
-    os_race = relevel(as.factor(os_surv_data$os_race), ref = unique(os_surv_data$os_race)[1])
-    os_surv_object = Surv(time = os_surv_data$OS.time, event =  os_surv_data$OS)
+    os_surv_table = as.data.frame(table(os_surv_data$OS))
+    if(min(os_surv_table$Freq)<min_surv_people)
+    {
+      endpoint_flag$OS = F
+    }else{
+      os_age = as.numeric(os_surv_data$age)
+      os_gender = relevel(as.factor(os_surv_data$gender), ref = unique(os_surv_data$gender)[1])
+      os_race = relevel(as.factor(os_surv_data$os_race), ref = unique(os_surv_data$os_race)[1])
+      os_surv_object = Surv(time = os_surv_data$OS.time, event =  os_surv_data$OS)
+    }
   }
-  ###
+   ###
   dss_surv_data = surv_info_data %>%
     dplyr::select(barcode, age, gender, dss_race, DSS, DSS.time) %>%
     na.omit() %>%
     dplyr::arrange(DSS, DSS.time)%>%
     dplyr::filter(DSS.time >= min_surv_time)
-  dss_surv_table = as.data.frame(table(dss_surv_data$DSS))
   
-  if(min(dss_surv_table$Freq)<min_surv_people)
+  if(nrow(dss_surv_data)==0)
   {
     endpoint_flag$DSS = F
   }else{
-  dss_age = as.numeric(dss_surv_data$age)
-  dss_gender = relevel(as.factor(dss_surv_data$gender), ref = unique(dss_surv_data$gender)[1])
-  dss_race = relevel(as.factor(dss_surv_data$dss_race), ref = unique(dss_surv_data$dss_race)[1])
-  dss_surv_object = Surv(time = dss_surv_data$DSS.time, event =  dss_surv_data$DSS)
+    dss_surv_table = as.data.frame(table(dss_surv_data$DSS))
+    if(min(dss_surv_table$Freq)<min_surv_people)
+    {
+      endpoint_flag$DSS = F
+    }else{
+      dss_age = as.numeric(dss_surv_data$age)
+      dss_gender = relevel(as.factor(dss_surv_data$gender), ref = unique(dss_surv_data$gender)[1])
+      dss_race = relevel(as.factor(dss_surv_data$dss_race), ref = unique(dss_surv_data$dss_race)[1])
+      dss_surv_object = Surv(time = dss_surv_data$DSS.time, event =  dss_surv_data$DSS)
+    }
+    
   }
-  ###
+  
+   ###
   dfi_surv_data = surv_info_data %>%
     dplyr::select(barcode, age, gender, dfi_race, DFI, DFI.time) %>%
     na.omit() %>%
     dplyr::arrange(DFI, DFI.time)%>%
     dplyr::filter(DFI.time >= min_surv_time)
-  dfi_surv_table = as.data.frame(table(dfi_surv_data$DFI))
-  if(min(dfi_surv_table$Freq)<min_surv_people)
+  
+  if(nrow(dfi_surv_data)==0)
   {
     endpoint_flag$DFI = F
   }else{
-  dfi_age = as.numeric(dfi_surv_data$age)
-  dfi_gender = relevel(as.factor(dfi_surv_data$gender), ref = unique(dfi_surv_data$gender)[1] )
-  dfi_race = relevel(as.factor(dfi_surv_data$dfi_race), ref = unique(dfi_surv_data$dfi_race)[1])
-  dfi_surv_object = Surv(time = dfi_surv_data$DFI.time, event =  dfi_surv_data$DFI)
+    dfi_surv_table = as.data.frame(table(dfi_surv_data$DFI))
+    if(min(dfi_surv_table$Freq)<min_surv_people)
+    {
+      endpoint_flag$DFI = F
+    }else{
+      dfi_age = as.numeric(dfi_surv_data$age)
+      dfi_gender = relevel(as.factor(dfi_surv_data$gender), ref = unique(dfi_surv_data$gender)[1] )
+      dfi_race = relevel(as.factor(dfi_surv_data$dfi_race), ref = unique(dfi_surv_data$dfi_race)[1])
+      dfi_surv_object = Surv(time = dfi_surv_data$DFI.time, event =  dfi_surv_data$DFI)
+    }
+
   }
   ###
   
@@ -426,17 +447,25 @@ fit_survival_model = function(surv_info_data,
     na.omit() %>%
     dplyr::arrange(PFI, PFI.time)%>%
     dplyr::filter(PFI.time >= min_surv_time)
-  pfi_surv_table = as.data.frame(table(pfi_surv_data$PFI))
-  if(min(pfi_surv_table$Freq)<min_surv_people)
+  
+  if(nrow(pfi_surv_data)==0)
   {
     endpoint_flag$PFI = F
   }else{
-  pfi_age = as.numeric(pfi_surv_data$age)
-  pfi_gender = relevel(as.factor(pfi_surv_data$gender), ref = unique(pfi_surv_data$gender)[1])
-  pfi_race = relevel(as.factor(pfi_surv_data$pfi_race), ref = unique(pfi_surv_data$pfi_race)[1])
-  pfi_surv_object = Surv(time = pfi_surv_data$PFI.time, event =  pfi_surv_data$PFI)
+    pfi_surv_table = as.data.frame(table(pfi_surv_data$PFI))
+    if(min(pfi_surv_table$Freq)<min_surv_people)
+    {
+      endpoint_flag$PFI = F
+    }else{
+      pfi_age = as.numeric(pfi_surv_data$age)
+      pfi_gender = relevel(as.factor(pfi_surv_data$gender), ref = unique(pfi_surv_data$gender)[1])
+      pfi_race = relevel(as.factor(pfi_surv_data$pfi_race), ref = unique(pfi_surv_data$pfi_race)[1])
+      pfi_surv_object = Surv(time = pfi_surv_data$PFI.time, event =  pfi_surv_data$PFI)
+    }
+    
   }
   
+ 
   
   #####
   
@@ -768,73 +797,103 @@ fit_survival_model_no_gender = function(surv_info_data,
   ### I should set a variable as a flag to indicate the inclusion of the 4 endpoints
   
   endpoint_flag = data.frame(OS = T, DSS = T, DFI = T, PFI = T, stringsAsFactors = F)
-  
+
   os_surv_data = surv_info_data %>%
     dplyr::select(barcode, age, gender, os_race, OS, OS.time) %>%
     na.omit() %>%
     dplyr::arrange(OS, OS.time) %>%
     dplyr::filter(OS.time >= min_surv_time)
   
-  os_surv_table = as.data.frame(table(os_surv_data$OS))
-  if(min(os_surv_table$Freq)<min_surv_people)
+  if(nrow(os_surv_data)==0)
   {
     endpoint_flag$OS = F
+    
   }else{
-    os_age = as.numeric(os_surv_data$age)
-    os_gender = relevel(as.factor(os_surv_data$gender), ref = unique(os_surv_data$gender)[1])
-    os_race = relevel(as.factor(os_surv_data$os_race), ref = unique(os_surv_data$os_race)[1])
-    os_surv_object = Surv(time = os_surv_data$OS.time, event =  os_surv_data$OS)
+    os_surv_table = as.data.frame(table(os_surv_data$OS))
+    if(min(os_surv_table$Freq)<min_surv_people)
+    {
+      endpoint_flag$OS = F
+    }else{
+      os_age = as.numeric(os_surv_data$age)
+      os_gender = relevel(as.factor(os_surv_data$gender), ref = unique(os_surv_data$gender)[1])
+      os_race = relevel(as.factor(os_surv_data$os_race), ref = unique(os_surv_data$os_race)[1])
+      os_surv_object = Surv(time = os_surv_data$OS.time, event =  os_surv_data$OS)
+    }
   }
   ###
   dss_surv_data = surv_info_data %>%
-    dplyr::select(barcode, age, gender,dss_race, DSS, DSS.time) %>%
+    dplyr::select(barcode, age, gender, dss_race, DSS, DSS.time) %>%
     na.omit() %>%
     dplyr::arrange(DSS, DSS.time)%>%
     dplyr::filter(DSS.time >= min_surv_time)
-  dss_surv_table = as.data.frame(table(dss_surv_data$DSS))
   
-  if(min(dss_surv_table$Freq)<min_surv_people)
+  if(nrow(dss_surv_data)==0)
   {
     endpoint_flag$DSS = F
   }else{
-    dss_age = as.numeric(dss_surv_data$age)
-    dss_gender = relevel(as.factor(dss_surv_data$gender), ref = unique(dss_surv_data$gender)[1])
-    dss_race = relevel(as.factor(dss_surv_data$dss_race), ref = unique(dss_surv_data$dss_race)[1])
-    dss_surv_object = Surv(time = dss_surv_data$DSS.time, event =  dss_surv_data$DSS)
+    dss_surv_table = as.data.frame(table(dss_surv_data$DSS))
+    if(min(dss_surv_table$Freq)<min_surv_people)
+    {
+      endpoint_flag$DSS = F
+    }else{
+      dss_age = as.numeric(dss_surv_data$age)
+      dss_gender = relevel(as.factor(dss_surv_data$gender), ref = unique(dss_surv_data$gender)[1])
+      dss_race = relevel(as.factor(dss_surv_data$dss_race), ref = unique(dss_surv_data$dss_race)[1])
+      dss_surv_object = Surv(time = dss_surv_data$DSS.time, event =  dss_surv_data$DSS)
+    }
+    
   }
+  
   ###
   dfi_surv_data = surv_info_data %>%
-    dplyr::select(barcode, age, gender,dfi_race, DFI, DFI.time) %>%
+    dplyr::select(barcode, age, gender, dfi_race, DFI, DFI.time) %>%
     na.omit() %>%
     dplyr::arrange(DFI, DFI.time)%>%
     dplyr::filter(DFI.time >= min_surv_time)
-  dfi_surv_table = as.data.frame(table(dfi_surv_data$DFI))
-  if(min(dfi_surv_table$Freq)<min_surv_people)
+  
+  if(nrow(dfi_surv_data)==0)
   {
     endpoint_flag$DFI = F
   }else{
-    dfi_age = as.numeric(dfi_surv_data$age)
-    dfi_gender = relevel(as.factor(dfi_surv_data$gender), ref = unique(dfi_surv_data$gender)[1] )
-    dfi_race = relevel(as.factor(dfi_surv_data$dfi_race), ref = unique(dfi_surv_data$dfi_race)[1])
-    dfi_surv_object = Surv(time = dfi_surv_data$DFI.time, event =  dfi_surv_data$DFI)
+    dfi_surv_table = as.data.frame(table(dfi_surv_data$DFI))
+    if(min(dfi_surv_table$Freq)<min_surv_people)
+    {
+      endpoint_flag$DFI = F
+    }else{
+      dfi_age = as.numeric(dfi_surv_data$age)
+      dfi_gender = relevel(as.factor(dfi_surv_data$gender), ref = unique(dfi_surv_data$gender)[1] )
+      dfi_race = relevel(as.factor(dfi_surv_data$dfi_race), ref = unique(dfi_surv_data$dfi_race)[1])
+      dfi_surv_object = Surv(time = dfi_surv_data$DFI.time, event =  dfi_surv_data$DFI)
+    }
+    
   }
   ###
   
   pfi_surv_data = surv_info_data %>%
-    dplyr::select(barcode, age, gender,pfi_race, PFI, PFI.time) %>%
+    dplyr::select(barcode, age, gender, pfi_race, PFI, PFI.time) %>%
     na.omit() %>%
     dplyr::arrange(PFI, PFI.time)%>%
     dplyr::filter(PFI.time >= min_surv_time)
-  pfi_surv_table = as.data.frame(table(pfi_surv_data$PFI))
-  if(min(pfi_surv_table$Freq)<min_surv_people)
+  
+  if(nrow(pfi_surv_data)==0)
   {
     endpoint_flag$PFI = F
   }else{
-    pfi_age = as.numeric(pfi_surv_data$age)
-    pfi_gender = relevel(as.factor(pfi_surv_data$gender), ref = unique(pfi_surv_data$gender)[1])
-    pfi_race = relevel(as.factor(pfi_surv_data$pfi_race), ref = unique(pfi_surv_data$pfi_race)[1])
-    pfi_surv_object = Surv(time = pfi_surv_data$PFI.time, event =  pfi_surv_data$PFI)
+    pfi_surv_table = as.data.frame(table(pfi_surv_data$PFI))
+    if(min(pfi_surv_table$Freq)<min_surv_people)
+    {
+      endpoint_flag$PFI = F
+    }else{
+      pfi_age = as.numeric(pfi_surv_data$age)
+      pfi_gender = relevel(as.factor(pfi_surv_data$gender), ref = unique(pfi_surv_data$gender)[1])
+      pfi_race = relevel(as.factor(pfi_surv_data$pfi_race), ref = unique(pfi_surv_data$pfi_race)[1])
+      pfi_surv_object = Surv(time = pfi_surv_data$PFI.time, event =  pfi_surv_data$PFI)
+    }
+    
   }
+  
+  
+  
   
   
   #####
