@@ -54,48 +54,53 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
   # mutation_type = "somatic"
   # piu_of_interest = "domain"
   # output_dir = "/data/ginny/tcga_pancan/COAD_somatic/cox_model/"
-  
-  
-  locus_unite = locus_counts_cdr_clinical_unite (
-    locus_count_filename = locus_filename,
-    cdr_clinical = cdr_clinical,
-    row_sum_min = row_sum_min,
-    output_dir =  output_dir,
-    output_name = paste0(mutation_type, "_locus_level_cdr_clinical_unite.tsv"))
-  
-  locus_info = cdr_tidy_up_for_model(
-    interest_variable_info = locus_unite[[2]],
-    unite_data = locus_unite[[1]],
-    race_group_min = race_group_min,
-    output_dir = output_dir,
-    output_name = paste0(mutation_type, "_locus_level_survival_info.tsv"))
-  
-  if(gender_as_covariate == T)
+   
+  ##do the locus level analysis only when there are the locus_filename
+  if(file.exists(locus_filename))
   {
-    fit_survival_model(
-      surv_info_data = locus_info,
-      interest_variable_info = locus_unite[[2]],
-      min_surv_time = min_surv_days,
-      min_surv_people = min_surv_people,
+    locus_unite = locus_counts_cdr_clinical_unite (
+      locus_count_filename = locus_filename,
+      cdr_clinical = cdr_clinical,
+      row_sum_min = row_sum_min,
       output_dir =  output_dir,
-      output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
+      output_name = paste0(mutation_type, "_locus_level_cdr_clinical_unite.tsv"))
+    
+    locus_info = cdr_tidy_up_for_model(
+      interest_variable_info = locus_unite[[2]],
+      unite_data = locus_unite[[1]],
+      race_group_min = race_group_min,
+      output_dir = output_dir,
+      output_name = paste0(mutation_type, "_locus_level_survival_info.tsv"))
+    
+    if(gender_as_covariate == T)
+    {
+      fit_survival_model(
+        surv_info_data = locus_info,
+        interest_variable_info = locus_unite[[2]],
+        min_surv_time = min_surv_days,
+        min_surv_people = min_surv_people,
+        output_dir =  output_dir,
+        output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
+      
+    }else{
+      fit_survival_model_no_gender(
+        surv_info_data = locus_info,
+        interest_variable_info = locus_unite[[2]],
+        min_surv_time = min_surv_days,
+        min_surv_people = min_surv_people,
+        output_dir =  output_dir,
+        output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
+      
+    }
+        cat("1/2...univariate Cox regression model on locus level counts fitted!", "\n")
     
   }else{
-    fit_survival_model_no_gender(
-      surv_info_data = locus_info,
-      interest_variable_info = locus_unite[[2]],
-      min_surv_time = min_surv_days,
-      min_surv_people = min_surv_people,
-      output_dir =  output_dir,
-      output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
+    
+    cat("1/2...locus level data not available, proceed to PIU level.", "\n")
+    
     
   }
-  
-  
-  
-  cat("1/2...univariate Cox regression model on locus level counts fitted!", "\n")
-  
-  ###
+    ###
   
   piu_unite = piu_counts_cdr_clinical_unite(
     piu_count_filename = piu_filename,

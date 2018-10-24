@@ -132,14 +132,14 @@ locus_level_matrix = function(pc_data_name,
                               output_dir,
                               output_filename)
 {
-  # 
-  # pc_data_name = "/data/ginny/tcga_pancan/STAD_somatic/STAD_somatic_mc3_pc.tsv"
-  # cancer_barcode = stad_barcode
-  # mut_freq_min = 2
-  # output_dir = "/data/ginny/tcga_pancan/STAD_somatic/STAD_summarise_mutation/"
-  # output_filename = "stad_mc3_count_matrix.tsv"
-  # 
-  pc_data = fread(pc_data_name, stringsAsFactors = F)
+  # pc_data_name = pc_data_name
+  # cancer_barcode = cancer_barcode
+  # mut_freq_min = locus_level_mut_min
+  # output_dir = output_dir
+  # output_filename = "mc3_count_matrix.tsv"
+  
+   
+    pc_data = fread(pc_data_name, stringsAsFactors = F)
   
 
   loci_df = pc_data%>%
@@ -153,32 +153,38 @@ locus_level_matrix = function(pc_data_name,
   sl_matrix = matrix(0, nrow = nrow(loci_df), ncol = length(cancer_barcode))
   colnames(sl_matrix) = cancer_barcode
   
-  for(i in 1:nrow(sl_matrix))
+  if(nrow(sl_matrix)>0)
   {
-    get_sample = unlist(strsplit(loci_df$agg_sample_id[i], split = "_"))
+    for(i in 1:nrow(sl_matrix))
+    {
+      get_sample = unlist(strsplit(loci_df$agg_sample_id[i], split = "_"))
+      
+      which_col = which(colnames(sl_matrix) %in% get_sample)
+      
+      sl_matrix[i,which_col] = 1
+      
+      if(i%%100 ==0)
+        cat(i,"\n")
+      
+    }
     
-    which_col = which(colnames(sl_matrix) %in% get_sample)
     
-    sl_matrix[i,which_col] = 1
     
-    if(i%%100 ==0)
-      cat(i,"\n")
+    loci_count_df = data.frame(loci_df$loci_info, sl_matrix, row_sum = rowSums(sl_matrix), stringsAsFactors = F)
+    colnames(loci_count_df) = c("locus_info", cancer_barcode, "row_sum")
     
+    loci_count =  loci_count_df %>%
+      dplyr::arrange(desc(row_sum))
+    
+    
+    write.table(loci_count, paste0(output_dir, output_filename),
+                quote =F, row.names = F, sep = "\t")
+    
+    
+  }else{
+    
+    cat("No frequent locus level data.","\n")
   }
-  
-  
-  
-  loci_count_df = data.frame(loci_df$loci_info, sl_matrix, row_sum = rowSums(sl_matrix), stringsAsFactors = F)
-  colnames(loci_count_df) = c("locus_info", cancer_barcode, "row_sum")
-  
-  loci_count =  loci_count_df %>%
-    dplyr::arrange(desc(row_sum))
-  
-  
-  write.table(loci_count, paste0(output_dir, output_filename),
-               quote =F, row.names = F, sep = "\t")
-  
-  
   
 }
 
