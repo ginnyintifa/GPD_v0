@@ -106,9 +106,10 @@ locus_counts_cdr_clinical_unite = function(locus_count_filename,
   # row_sum_min = row_sum_min
   # output_dir =  output_dir
   # output_name = paste0(mutation_type, "_locus_level_cdr_clinical_unite.tsv")
-  # locus_count_df = fread(locus_count_filename,
-  #                      stringsAsFactors = F)
-  # 
+  
+  locus_count_df = fread(locus_count_filename,
+                        stringsAsFactors = F)
+   
   locus_count_sel = locus_count_df%>%
     dplyr::filter(row_sum > row_sum_min)
     
