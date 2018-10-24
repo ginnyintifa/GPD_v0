@@ -670,53 +670,59 @@ fit_survival_model = function(surv_info_data,
   
   # q_val = p.adjust(surv_result_df$count_pval,method = "BH")
   ## prevent truncated p value distribution 
-  
-  
-  if(endpoint_flag$OS == T)
+  if(length(interest_variable_info)>5)
   {
-    if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os,na.rm = T)<0.05 & max(surv_result_df$count_pval_os,na.rm = T)>0.95)
+    if(endpoint_flag$OS == T)
     {
-      os_qval = qvalue(surv_result_df$count_pval_os)
-    }else{
-      os_qval = qvalue(surv_result_df$count_pval_os, pi0 = 1)
+      if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os,na.rm = T)<0.05 & max(surv_result_df$count_pval_os,na.rm = T)>0.95)
+      {
+        os_qval = qvalue(surv_result_df$count_pval_os)
+      }else{
+        os_qval = qvalue(surv_result_df$count_pval_os, pi0 = 1)
+        
+      }
+      surv_result_df$count_qval_os = os_qval$qvalues
       
     }
-    surv_result_df$count_qval_os = os_qval$qvalues
     
-  }
-  
-  if(endpoint_flag$DSS == T)
-  {  
-    if(length(surv_result_df$count_pval_dss)>300 &min(surv_result_df$count_pval_dss,na.rm = T)<0.05 & max(surv_result_df$count_pval_dss,na.rm = T)>0.95)
-    {
-      dss_qval = qvalue(surv_result_df$count_pval_dss)
-    }else{
-      dss_qval = qvalue(surv_result_df$count_pval_dss, pi0 = 1)
+    if(endpoint_flag$DSS == T)
+    {  
+      if(length(surv_result_df$count_pval_dss)>300 &min(surv_result_df$count_pval_dss,na.rm = T)<0.05 & max(surv_result_df$count_pval_dss,na.rm = T)>0.95)
+      {
+        dss_qval = qvalue(surv_result_df$count_pval_dss)
+      }else{
+        dss_qval = qvalue(surv_result_df$count_pval_dss, pi0 = 1)
+      }
+      surv_result_df$count_qval_dss = dss_qval$qvalues
     }
-    surv_result_df$count_qval_dss = dss_qval$qvalues
-  }
-  
-  
-  if(endpoint_flag$DFI == T)
-  {
-    if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_dfi,na.rm = T)>0.95)
+    
+    
+    if(endpoint_flag$DFI == T)
     {
-      dfi_qval = qvalue(surv_result_df$count_pval_dfi)
-    }else{
-      dfi_qval = qvalue(surv_result_df$count_pval_dfi, pi0 = 1)
+      if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_dfi,na.rm = T)>0.95)
+      {
+        dfi_qval = qvalue(surv_result_df$count_pval_dfi)
+      }else{
+        dfi_qval = qvalue(surv_result_df$count_pval_dfi, pi0 = 1)
+      }
+      surv_result_df$count_qval_dfi = dfi_qval$qvalues
     }
-    surv_result_df$count_qval_dfi = dfi_qval$qvalues
-  }
-  if(endpoint_flag$PFI == T)
-  {
-    if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_pfi,na.rm = T)>0.95)
+    if(endpoint_flag$PFI == T)
     {
-      pfi_qval = qvalue(surv_result_df$count_pval_pfi)
-    }else{
-      pfi_qval = qvalue(surv_result_df$count_pval_pfi, pi0 = 1)
-      
+      if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_pfi,na.rm = T)>0.95)
+      {
+        pfi_qval = qvalue(surv_result_df$count_pval_pfi)
+      }else{
+        pfi_qval = qvalue(surv_result_df$count_pval_pfi, pi0 = 1)
+        
+      }
+      surv_result_df$count_qval_pfi = pfi_qval$qvalues
     }
-    surv_result_df$count_qval_pfi = pfi_qval$qvalues
+    
+    
+  }else{
+    
+    cat("Small unit size, no q-val estimation.","\n")
   }
   
   
@@ -1009,51 +1015,56 @@ fit_survival_model_no_gender = function(surv_info_data,
   # q_val = p.adjust(surv_result_df$count_pval,method = "BH")
   ## prevent truncated p value distribution 
   
-  
-  if(endpoint_flag$OS == T)
+  if(length(interest_variable_info)>5)
   {
-    if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os,na.rm = T)<0.05 & max(surv_result_df$count_pval_os,na.rm = T)>0.95)
+    if(endpoint_flag$OS == T)
     {
-      os_qval = qvalue(surv_result_df$count_pval_os)
-    }else{
-      os_qval = qvalue(surv_result_df$count_pval_os, pi0 = 1)
+      if(length(surv_result_df$count_pval_os)>300 & min(surv_result_df$count_pval_os,na.rm = T)<0.05 & max(surv_result_df$count_pval_os,na.rm = T)>0.95)
+      {
+        os_qval = qvalue(surv_result_df$count_pval_os)
+      }else{
+        os_qval = qvalue(surv_result_df$count_pval_os, pi0 = 1)
+        
+      }
+      surv_result_df$count_qval_os = os_qval$qvalues
       
     }
-    surv_result_df$count_qval_os = os_qval$qvalues
+    if(endpoint_flag$DSS == T)
+    {  
+      if(length(surv_result_df$count_pval_dss)>300&min(surv_result_df$count_pval_dss,na.rm = T)<0.05 & max(surv_result_df$count_pval_dss,na.rm = T)>0.95)
+      {
+        dss_qval = qvalue(surv_result_df$count_pval_dss)
+      }else{
+        dss_qval = qvalue(surv_result_df$count_pval_dss, pi0 = 1)
+      }
+      surv_result_df$count_qval_dss = dss_qval$qvalues
+    }
+    if(endpoint_flag$DFI == T)
+    {
+      if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_dfi,na.rm = T)>0.95)
+      {
+        dfi_qval = qvalue(surv_result_df$count_pval_dfi)
+      }else{
+        dfi_qval = qvalue(surv_result_df$count_pval_dfi, pi0 = 1)
+      }
+      surv_result_df$count_qval_dfi = dfi_qval$qvalues
+    }
+    if(endpoint_flag$PFI == T)
+    {
+      if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_pfi,na.rm = T)>0.95)
+      {
+        pfi_qval = qvalue(surv_result_df$count_pval_pfi)
+      }else{
+        pfi_qval = qvalue(surv_result_df$count_pval_pfi, pi0 = 1)
+        
+      }
+      surv_result_df$count_qval_pfi = pfi_qval$qvalues
+    }
     
+    
+  }else{
+    cat("Small unit size, no q-val estimation.", "\n")
   }
-  if(endpoint_flag$DSS == T)
-  {  
-    if(length(surv_result_df$count_pval_dss)>300&min(surv_result_df$count_pval_dss,na.rm = T)<0.05 & max(surv_result_df$count_pval_dss,na.rm = T)>0.95)
-    {
-      dss_qval = qvalue(surv_result_df$count_pval_dss)
-    }else{
-      dss_qval = qvalue(surv_result_df$count_pval_dss, pi0 = 1)
-    }
-    surv_result_df$count_qval_dss = dss_qval$qvalues
-  }
-  if(endpoint_flag$DFI == T)
-  {
-    if(length(surv_result_df$count_pval_dfi)>300&min(surv_result_df$count_pval_dfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_dfi,na.rm = T)>0.95)
-    {
-      dfi_qval = qvalue(surv_result_df$count_pval_dfi)
-    }else{
-      dfi_qval = qvalue(surv_result_df$count_pval_dfi, pi0 = 1)
-    }
-    surv_result_df$count_qval_dfi = dfi_qval$qvalues
-  }
-  if(endpoint_flag$PFI == T)
-  {
-    if(length(surv_result_df$count_pval_pfi)>300&min(surv_result_df$count_pval_pfi,na.rm = T)<0.05 & max(surv_result_df$count_pval_pfi,na.rm = T)>0.95)
-    {
-      pfi_qval = qvalue(surv_result_df$count_pval_pfi)
-    }else{
-      pfi_qval = qvalue(surv_result_df$count_pval_pfi, pi0 = 1)
-      
-    }
-    surv_result_df$count_qval_pfi = pfi_qval$qvalues
-  }
-  
   
   
   surv_df = surv_result_df %>%
