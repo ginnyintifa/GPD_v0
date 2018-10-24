@@ -74,7 +74,7 @@ piu_counts_cdr_clinical_unite = function(piu_count_filename,
   return_list[[4]] = piu_count_sel$gene_id
   
   
-  cat("$$$$$$$$$$$$$$ write out for piu unit.", "\n")
+  #cat("$$$$$$$$$$$$$$ write out for piu unit.", "\n")
   
   write.table(return_list[[1]], paste0(output_dir, output_name),
               quote = F, row.names = F, sep = "\t")
@@ -137,7 +137,7 @@ locus_counts_cdr_clinical_unite = function(locus_count_filename,
   return_list[[1]] = locus_clinical_unite_data
   return_list[[2]] = locus_count_sel$locus_info
  
-  cat("$$$$$$$$$$$$$$ write out for locus unit.", "\n")
+ # cat("$$$$$$$$$$$$$$ write out for locus unit.", "\n")
   
   write.table(return_list[[1]], paste0(output_dir, output_name),
               quote = F, row.names = F, sep = "\t")
@@ -333,7 +333,7 @@ cdr_tidy_up_for_model = function(interest_variable_info, unite_data, race_group_
                   pfi_race, PFI, PFI.time,
                   one_of(interest_variable_info))
   
-  cat("$$$$$$$$$$$$$$ write out for tidy up.", "\n")
+ # cat("$$$$$$$$$$$$$$ write out for tidy up.", "\n")
   
   
   write.table(patient_count_survival, paste0(output_dir, output_name),
