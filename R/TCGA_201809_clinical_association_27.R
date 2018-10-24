@@ -457,13 +457,34 @@ fit_survival_model = function(surv_info_data,
     if(endpoint_flag$OS == T)
     {
       
-      os_model = coxph(os_surv_object ~  os_age + os_gender + os_race+ 
-                         os_count[,7])   
+      
+      if(length(unique(os_gender))>1)
+      {
+        if(length(unique(os_race))>1)
+        {
+          os_model = coxph(os_surv_object ~  os_age  + os_gender + os_race+ 
+                             os_count[,7])   
+        }else{
+          os_model = coxph(os_surv_object ~  os_age  + os_gender +
+                             os_count[,7])   
+        }
 
+      }else{
+        if(length(unique(os_race))>1)
+        {
+          os_model = coxph(os_surv_object ~  os_age  + os_race+ 
+                             os_count[,7])   
+        }else{
+          os_model = coxph(os_surv_object ~  os_age +
+                             os_count[,7])   
+        }
+        
+      }
+      
+     # r_os = 1 + length(unique(os_gender))-1 +length(unique(os_race))-1 +1
       os = summary(os_model)
       os_coef = os$coefficients
-      r_os = 2+length(unique(os_race))
-      
+      r_os =  length(unique(os_gender)) +length(unique(os_race))
       count_coeff_os = os_coef[r_os,1]
       count_exp_coeff_os = os_coef[r_os,2]
       count_pval_os = os_coef[r_os,5]
@@ -484,11 +505,38 @@ fit_survival_model = function(surv_info_data,
     
     if(endpoint_flag$DSS == T)
     {
-      dss_model = coxph(dss_surv_object ~  dss_age + dss_gender + dss_race+ 
-                          dss_count[,7])   
+      if(length(unique(dss_gender))>1)
+      {
+        if(length(unique(dss_race))>1)
+        {
+          
+          dss_model = coxph(dss_surv_object ~  dss_age  + dss_gender + dss_race+ 
+                              dss_count[,7])   
+          
+        }else{
+          
+          dss_model = coxph(dss_surv_object ~  dss_age  + dss_gender +
+                              dss_count[,7])   
+          
+        }
+      }else{
+        if(length(unique(dss_race))>1)
+        {
+          
+          dss_model = coxph(dss_surv_object ~  dss_age  + dss_race+ 
+                              dss_count[,7])   
+          
+        }else{
+          
+          dss_model = coxph(dss_surv_object ~  dss_age  +
+                              dss_count[,7])   
+          
+        }
+      }
+      
       dss = summary(dss_model)
       dss_coef = dss$coefficients
-      r_dss = 2+length(unique(dss_race))
+      r_dss = length(unique(dss_gender))+length(unique(dss_race))
       count_coeff_dss = dss_coef[r_dss,1]
       count_exp_coeff_dss = dss_coef[r_dss,2]
       count_pval_dss = dss_coef[r_dss,5]
@@ -507,11 +555,41 @@ fit_survival_model = function(surv_info_data,
     
     if(endpoint_flag$DFI == T)
     {
-      dfi_model = coxph(dfi_surv_object ~  dfi_age + dfi_gender + dfi_race+ 
-                          dfi_count[,7])   
+      if(length(unique(dfi_gender))>1)
+      {
+        if(length(unique(dfi_race))>1)
+        {
+          
+          dfi_model = coxph(dfi_surv_object ~  dfi_age  + dfi_gender + dfi_race+ 
+                              dfi_count[,7])   
+          
+        }else{
+          
+          dfi_model = coxph(dfi_surv_object ~  dfi_age  + dfi_gender +
+                              dfi_count[,7])   
+          
+        }
+        
+      }else{
+        if(length(unique(dfi_race))>1)
+        {
+          
+          dfi_model = coxph(dfi_surv_object ~  dfi_age  +  dfi_race+ 
+                              dfi_count[,7])   
+          
+        }else{
+          
+          dfi_model = coxph(dfi_surv_object ~  dfi_age  + 
+                              dfi_count[,7])   
+          
+        }
+        
+      }
+     
+        
       dfi = summary(dfi_model)
       dfi_coef = dfi$coefficients
-      r_dfi = 2+length(unique(dfi_race))
+      r_dfi = length(unique(dfi_gender))+length(unique(dfi_race))
       
       count_coeff_dfi = dfi_coef[r_dfi,1]
       count_exp_coeff_dfi = dfi_coef[r_dfi,2]
@@ -532,11 +610,35 @@ fit_survival_model = function(surv_info_data,
     
     if(endpoint_flag$PFI == T)
     {
-      pfi_model = coxph(pfi_surv_object ~  pfi_age + pfi_gender + pfi_race+ 
-                          pfi_count[,7])   
+      
+      if(length(unique(pfi_gender))>1)
+      {
+        if(length(unique(pfi_race))>1)
+        {
+          
+          pfi_model = coxph(pfi_surv_object ~  pfi_age  + pfi_gender + pfi_race+ 
+                              pfi_count[,7])   
+          
+        }else{
+          
+          pfi_model = coxph(pfi_surv_object ~  pfi_age  + pfi_gender +
+                              pfi_count[,7])   
+          
+        }
+      }else{
+        if(length(unique(pfi_race))>1)
+        {
+          pfi_model = coxph(pfi_surv_object ~  pfi_age  + pfi_race+ 
+                              pfi_count[,7])   
+        }else{
+          pfi_model = coxph(pfi_surv_object ~  pfi_age  +
+                              pfi_count[,7])   
+        }
+      }
+         
       pfi = summary(pfi_model)
       pfi_coef = pfi$coefficients
-      r_pfi = 2+length(unique(pfi_race))
+      r_pfi = length(unique(pfi_gender))+length(unique(pfi_race))
       
       count_coeff_pfi = pfi_coef[r_pfi,1]
       count_exp_coeff_pfi = pfi_coef[r_pfi,2]
@@ -746,9 +848,21 @@ fit_survival_model_no_gender = function(surv_info_data,
     
     if(endpoint_flag$OS == T)
     {
+      ### a potential bug, for both gender/no gender functions, race may not be there >=2 types.
+      ### I should prepare for this 
       
-      os_model = coxph(os_surv_object ~  os_age  + os_race+ 
-                         os_count[,7])   
+      if(length(unique(os_race))>1)
+      {
+        
+        os_model = coxph(os_surv_object ~  os_age  + os_race+ 
+                           os_count[,7])   
+        
+      }else{
+        
+        os_model = coxph(os_surv_object ~  os_age  + 
+                           os_count[,7])   
+        
+      }
       
       os = summary(os_model)
       os_coef = os$coefficients
@@ -774,8 +888,20 @@ fit_survival_model_no_gender = function(surv_info_data,
     
     if(endpoint_flag$DSS == T)
     {
-      dss_model = coxph(dss_surv_object ~  dss_age  + dss_race+ 
-                          dss_count[,7])   
+      
+      if(length(unique(dss_race))>1)
+      {
+        
+        dss_model = coxph(dss_surv_object ~  dss_age  + dss_race+ 
+                           dss_count[,7])   
+        
+      }else{
+        
+        dss_model = coxph(dss_surv_object ~  dss_age  + 
+                           dss_count[,7])   
+        
+      }
+      
       dss = summary(dss_model)
       dss_coef = dss$coefficients
       r_dss = 1+length(unique(dss_race))
@@ -797,8 +923,21 @@ fit_survival_model_no_gender = function(surv_info_data,
     
     if(endpoint_flag$DFI == T)
     {
-      dfi_model = coxph(dfi_surv_object ~  dfi_age + dfi_race+ 
-                          dfi_count[,7])   
+      
+      
+      if(length(unique(dfi_race))>1)
+      {
+        
+        dfi_model = coxph(dfi_surv_object ~  dfi_age  + dfi_race+ 
+                            dfi_count[,7])   
+        
+      }else{
+        
+        dfi_model = coxph(dfi_surv_object ~  dfi_age  + 
+                            dss_count[,7])   
+        
+      }
+      
       dfi = summary(dfi_model)
       dfi_coef = dfi$coefficients
       r_dfi = 1+length(unique(dfi_race))
@@ -822,8 +961,19 @@ fit_survival_model_no_gender = function(surv_info_data,
     
     if(endpoint_flag$PFI == T)
     {
-      pfi_model = coxph(pfi_surv_object ~  pfi_age + pfi_race+ 
-                          pfi_count[,7])   
+      if(length(unique(pfi_race))>1)
+      {
+        
+        pfi_model = coxph(pfi_surv_object ~  pfi_age  + pfi_race+ 
+                            pfi_count[,7])   
+        
+      }else{
+        
+        pfi_model = coxph(pfi_surv_object ~  pfi_age  + 
+                            pfi_count[,7])   
+        
+      }
+      
       pfi = summary(pfi_model)
       pfi_coef = pfi$coefficients
       r_pfi = 1+length(unique(pfi_race))
