@@ -43,18 +43,18 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
  {
   
    
-  # locus_filename = "/data/ginny/tcga_pancan/COAD_somatic/COAD_summarise_mutation/mc3_count_matrix.tsv"
-  # piu_filename = "/data/ginny/tcga_pancan/COAD_somatic/COAD_summarise_mutation/piu_mapping_count.tsv"
-  # cdr_clinical = coad_cdr
-  # gender_as_covariate = T
+  # locus_filename = this_locus_filename
+  # piu_filename = this_piu_filename
+  # cdr_clinical = this_cdr
+  # gender_as_covariate = use_gender[i]
   # race_group_min = 6
   # min_surv_days = 30
   # min_surv_people = 5
-  # row_sum_min = 2
+  # row_sum_min = 3
   # mutation_type = "somatic"
   # piu_of_interest = "domain"
-  # output_dir = "/data/ginny/tcga_pancan/COAD_somatic/cox_model/"
-   
+  # output_dir = third_dir
+  # 
   ##do the locus level analysis only when there are the locus_filename
   if(file.exists(locus_filename))
   {

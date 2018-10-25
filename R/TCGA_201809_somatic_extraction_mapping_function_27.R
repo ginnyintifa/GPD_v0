@@ -145,7 +145,7 @@ locus_level_matrix = function(pc_data_name,
   loci_df = pc_data%>%
     dplyr::mutate(loci_info = paste(Chromosome,Start_Position, End_Position, Hugo_Symbol,HGVSc, HGVSp, sep = "_"))%>%
     dplyr::arrange(desc(mut_freq))  %>%
-    dplyr::filter(mut_freq>mut_freq_min)
+    dplyr::filter(mut_freq>=mut_freq_min)
   
   
   
