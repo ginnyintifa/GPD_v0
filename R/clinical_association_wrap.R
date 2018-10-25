@@ -41,23 +41,7 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
                                                       #piu_of_interest = "domain",
                                                       output_dir)
  {
-  
-  ### I should do for both domain and PTM
-   
-  # locus_filename = this_locus_filename
-  # piu_filename = this_piu_filename
-  # cdr_clinical = this_cdr
-  # gender_as_covariate = use_gender[i]
-  # race_group_min = 6
-  # min_surv_days = 30
-  # min_surv_people = 5
-  # row_sum_min = 3
-  # mutation_type = "somatic"
-  # piu_of_interest = "domain"
-  # output_dir = third_dir
-  # 
-  ##do the locus level analysis only when there are the locus_filename
-  if(file.exists(locus_filename))
+    if(file.exists(locus_filename))
   {
     locus_unite = locus_counts_cdr_clinical_unite (
       locus_count_filename = locus_filename,
