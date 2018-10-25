@@ -7,7 +7,7 @@
 univariate_cox_model_for_somatic_locus_piu(locus_filename, piu_filename,
   cdr_clinical, gender_as_covariate = T, race_group_min = 6,
   min_surv_days = 30, min_surv_people = 5, row_sum_min = 2,
-  mutation_type = "somatic", piu_of_interest = "domain", output_dir)
+  mutation_type = "somatic", output_dir)
 }
 \arguments{
 \item{locus_filename}{The name of the file containing locus of interest.}
@@ -26,9 +26,9 @@ univariate_cox_model_for_somatic_locus_piu(locus_filename, piu_filename,
 
 \item{mutation_type}{Somatic or germline mutation, default is "somatic".}
 
-\item{piu_of_interest}{Domain or PTM sites as the PIU of interest, default is "domain".}
-
 \item{output_dir}{The directory you would like to have your output files in.}
+
+\item{piu_of_interest}{Domain or PTM sites as the PIU of interest, default is "domain".}
 }
 \description{
 This function generates one file as the result, the coefficients and significance level estimated for the model.

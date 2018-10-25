@@ -26,62 +26,68 @@ piu_counts_cdr_clinical_unite = function(piu_count_filename,
     dplyr::filter(unit_label == piu_of_interest)%>%
     dplyr::mutate(piu_info = paste(uniprot_accession, start_position,end_position, unit_name, gene_name, gene_id, sep = "_"))%>%
     dplyr::mutate(gene_info = paste(gene_name, gene_id,sep = "_"))%>%
-    dplyr::filter(row_sum > row_sum_min) %>%
+    dplyr::filter(row_sum >= row_sum_min) %>%
     dplyr::select(uniprot_accession, start_position, end_position, unit_name, gene_name, gene_id, unit_label,gene_info, piu_info, row_sum,
                   everything())
   
   #piu_info = piu_count_sel$piu_info
   
-  
-  which_barcode = grep("TCGA", colnames(piu_count_sel))
-  
-  piu_matrix = t(as.matrix(piu_count_sel[,which_barcode]))
-  
-  piu_count = data.frame(barcode = colnames(piu_count_sel)[which_barcode],
-                         piu_matrix,
-                         stringsAsFactors = F)
-  
-  colnames(piu_count) = c("barcode", piu_count_sel$piu_info)
-  rownames(piu_count) = NULL
-  
-  piu_gene_df = data.frame(piu_info = piu_count_sel$piu_info,
-                           gene_info = piu_count_sel$gene_info,
+  if(nrow(piu_count_sel)>0)
+  {
+    which_barcode = grep("TCGA", colnames(piu_count_sel))
+    
+    piu_matrix = t(as.matrix(piu_count_sel[,which_barcode]))
+    
+    piu_count = data.frame(barcode = colnames(piu_count_sel)[which_barcode],
+                           piu_matrix,
                            stringsAsFactors = F)
+    
+    colnames(piu_count) = c("barcode", piu_count_sel$piu_info)
+    rownames(piu_count) = NULL
+    
+    piu_gene_df = data.frame(piu_info = piu_count_sel$piu_info,
+                             gene_info = piu_count_sel$gene_info,
+                             stringsAsFactors = F)
+    
+    
+    
+    
+    
+    piu_clinical_unite_data = piu_count %>%
+      dplyr::left_join(cdr_clinical, by = c("barcode" = "bcr_patient_barcode")) %>%
+      dplyr::select(barcode,colnames(cdr_clinical)[3:34],everything())
+    
+    
+    # piu_clinical_unite_data = piu_count %>%
+    #   dplyr::left_join(patient_outcome, by = c("barcode" = "bcr_patient_barcode")) %>%
+    #   na.omit() %>%
+    #   dplyr::left_join(patient_info, by  = c("barcode" = "bcr_patient_barcode"))%>%
+    #   na.omit() %>% 
+    #   dplyr::arrange(desc(surv_time))%>%
+    #   dplyr::arrange(vital_status) 
+    
+    
+    return_list = vector(mode = "list", length = 4)
+    
+    return_list[[1]] = piu_clinical_unite_data
+    return_list[[2]] = piu_gene_df
+    return_list[[3]] = piu_count_sel$piu_info
+    return_list[[4]] = piu_count_sel$gene_id
+    
+    
+    #cat("$$$$$$$$$$$$$$ write out for piu unit.", "\n")
+    
+    write.table(return_list[[1]], paste0(output_dir, output_name),
+                quote = F, row.names = F, sep = "\t")
+    
+    return(return_list)
+    
+  }else{
+    cat("No item on this type of PIU.","\n")
+  }
   
+
   
-  
-  
-  
-  piu_clinical_unite_data = piu_count %>%
-    dplyr::left_join(cdr_clinical, by = c("barcode" = "bcr_patient_barcode")) %>%
-    dplyr::select(barcode,colnames(cdr_clinical)[3:34],everything())
-  
-   
-  # piu_clinical_unite_data = piu_count %>%
-  #   dplyr::left_join(patient_outcome, by = c("barcode" = "bcr_patient_barcode")) %>%
-  #   na.omit() %>%
-  #   dplyr::left_join(patient_info, by  = c("barcode" = "bcr_patient_barcode"))%>%
-  #   na.omit() %>% 
-  #   dplyr::arrange(desc(surv_time))%>%
-  #   dplyr::arrange(vital_status) 
-  
-  
-  return_list = vector(mode = "list", length = 4)
-  
-  return_list[[1]] = piu_clinical_unite_data
-  return_list[[2]] = piu_gene_df
-  return_list[[3]] = piu_count_sel$piu_info
-  return_list[[4]] = piu_count_sel$gene_id
-  
-  
-  #cat("$$$$$$$$$$$$$$ write out for piu unit.", "\n")
-  
-  write.table(return_list[[1]], paste0(output_dir, output_name),
-              quote = F, row.names = F, sep = "\t")
-  
-  
-  
-  return(return_list)
   
 }
 
@@ -111,7 +117,7 @@ locus_counts_cdr_clinical_unite = function(locus_count_filename,
                         stringsAsFactors = F)
    
   locus_count_sel = locus_count_df%>%
-    dplyr::filter(row_sum > row_sum_min)
+    dplyr::filter(row_sum >= row_sum_min)
     
   #piu_info = piu_count_sel$piu_info
   

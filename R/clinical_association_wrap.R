@@ -38,10 +38,11 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
                                                       min_surv_people = 5,
                                                       row_sum_min = 2,
                                                       mutation_type = "somatic",
-                                                      piu_of_interest = "domain",
+                                                      #piu_of_interest = "domain",
                                                       output_dir)
  {
   
+  ### I should do for both domain and PTM
    
   # locus_filename = this_locus_filename
   # piu_filename = this_piu_filename
@@ -103,41 +104,93 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
     ###
   if(file.exists(piu_filename))
   {
-    piu_unite = piu_counts_cdr_clinical_unite(
+    domain_piu_unite = piu_counts_cdr_clinical_unite(
       piu_count_filename = piu_filename,
       cdr_clinical = cdr_clinical,
-      piu_of_interest = piu_of_interest,
+      piu_of_interest = "domain",
       row_sum_min = row_sum_min,
       output_dir = output_dir,
-      output_name = paste0(mutation_type,"_", piu_of_interest, "_cdr_clinical_unite.tsv"))
+      output_name = paste0(mutation_type,"_domain_cdr_clinical_unite.tsv"))
     
-    piu_info = cdr_tidy_up_for_model(
-      interest_variable_info = piu_unite[[3]],
-      unite_data = piu_unite[[1]],
-      race_group_min = race_group_min,
-      output_dir = output_dir,
-      output_name = paste0(mutation_type,"_", piu_of_interest, "_survival_info.tsv"))
-    
-    if(gender_as_covariate == T)
-    {
-      fit_survival_model(
-        surv_info_data = piu_info,
-        interest_variable_info = piu_unite[[3]],
-        min_surv_time = min_surv_days,
-        min_surv_people = min_surv_people,
-        output_dir = output_dir,
-        output_name = paste0(mutation_type,"_", piu_of_interest, "_cdr_univariate_piu.tsv"))
-      
+    if(file.exists(paste0(output_dir,paste0(mutation_type,"_domain_cdr_clinical_unite.tsv"))))
+       {
+         domain_piu_info = cdr_tidy_up_for_model(
+           interest_variable_info = domain_piu_unite[[3]],
+           unite_data = domain_piu_unite[[1]],
+           race_group_min = race_group_min,
+           output_dir = output_dir,
+           output_name = paste0(mutation_type,"_domain_survival_info.tsv"))
+         
+         if(gender_as_covariate == T)
+         {
+           fit_survival_model(
+             surv_info_data = domain_piu_info,
+             interest_variable_info = domain_piu_unite[[3]],
+             min_surv_time = min_surv_days,
+             min_surv_people = min_surv_people,
+             output_dir = output_dir,
+             output_name = paste0(mutation_type,"_domain_cdr_univariate_piu.tsv"))
+           
+         }else{
+           fit_survival_model_no_gender(
+             surv_info_data = domain_piu_info,
+             interest_variable_info = domain_piu_unite[[3]],
+             min_surv_time = min_surv_days,
+             min_surv_people = min_surv_people,
+             output_dir = output_dir,
+             output_name = paste0(mutation_type,"_domain_cdr_univariate_piu.tsv"))
+         }
     }else{
-      fit_survival_model_no_gender(
-        surv_info_data = piu_info,
-        interest_variable_info = piu_unite[[3]],
-        min_surv_time = min_surv_days,
-        min_surv_people = min_surv_people,
-        output_dir = output_dir,
-        output_name = paste0(mutation_type,"_", piu_of_interest, "_cdr_univariate_piu.tsv"))
-    }
+      cat("...this type of PIU level data not available.", "\n")
+      
+      }
+     
+    #################
     
+       
+    ptm_piu_unite = piu_counts_cdr_clinical_unite(
+      piu_count_filename = piu_filename,
+      cdr_clinical = cdr_clinical,
+      piu_of_interest = "ptm",
+      row_sum_min = row_sum_min,
+      output_dir = output_dir,
+      output_name = paste0(mutation_type,"_ptm_cdr_clinical_unite.tsv"))
+    
+    
+    if(file.exists(paste0(output_dir,paste0(mutation_type,"_ptm_cdr_clinical_unite.tsv"))))
+       {
+         
+         ptm_piu_info = cdr_tidy_up_for_model(
+           interest_variable_info = ptm_piu_unite[[3]],
+           unite_data = ptm_piu_unite[[1]],
+           race_group_min = race_group_min,
+           output_dir = output_dir,
+           output_name = paste0(mutation_type,"_ptm_survival_info.tsv"))
+         
+         if(gender_as_covariate == T)
+         {
+           fit_survival_model(
+             surv_info_data = ptm_piu_info,
+             interest_variable_info = ptm_piu_unite[[3]],
+             min_surv_time = min_surv_days,
+             min_surv_people = min_surv_people,
+             output_dir = output_dir,
+             output_name = paste0(mutation_type,"_ptm_cdr_univariate_piu.tsv"))
+           
+         }else{
+           fit_survival_model_no_gender(
+             surv_info_data = ptm_piu_info,
+             interest_variable_info = ptm_piu_unite[[3]],
+             min_surv_time = min_surv_days,
+             min_surv_people = min_surv_people,
+             output_dir = output_dir,
+             output_name = paste0(mutation_type,"_ptm_cdr_univariate_piu.tsv"))
+         }
+        
+    }else{
+      cat("...this type of PIU level data not available.", "\n")
+    }
+     
     cat("2/2...univariate Cox regression model on PIU level counts fitted!", "\n")
     
   }else{
