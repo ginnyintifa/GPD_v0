@@ -50,9 +50,6 @@ piu_counts_cdr_clinical_unite = function(piu_count_filename,
                              stringsAsFactors = F)
     
     
-    
-    
-    
     piu_clinical_unite_data = piu_count %>%
       dplyr::left_join(cdr_clinical, by = c("barcode" = "bcr_patient_barcode")) %>%
       dplyr::select(barcode,colnames(cdr_clinical)[3:34],everything())
@@ -85,9 +82,7 @@ piu_counts_cdr_clinical_unite = function(piu_count_filename,
   }else{
     cat("No item on this type of PIU.","\n")
   }
-  
 
-  
   
 }
 
