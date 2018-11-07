@@ -5,7 +5,8 @@
 \title{Map soamtic pc to piu and bpiu, summarise bpiu and npc per gene}
 \usage{
 somatic_piu_mapping(ptm_domain_filename, pc_data_name, npc_data_name,
-  cancer_barcode, locus_level_mut_min = 2, output_dir)
+  cancer_barcode, locus_level_mut_min = 3, gene_level_mut_min = 1,
+  output_dir)
 }
 \arguments{
 \item{ptm_domain_filename}{The file provided by the package where the piu information is recorded.}

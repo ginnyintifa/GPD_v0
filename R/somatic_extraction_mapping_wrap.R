@@ -61,6 +61,7 @@ somatic_extraction_annotation_pos = function(mc3_info_file,
 
 ### somatic mapping
 
+## I will add whole gene count here.
 
 
 #' Map soamtic pc to piu and bpiu, summarise bpiu and npc per gene
@@ -91,19 +92,22 @@ somatic_piu_mapping = function (ptm_domain_filename,
                                  pc_data_name,
                                  npc_data_name,
                                  cancer_barcode,
-                                 locus_level_mut_min = 2,
+                                 locus_level_mut_min = 3,
+                                 gene_level_mut_min = 1,
                                  output_dir)
   
 {
   
   # 
-  # 
   # ptm_domain_filename = "/data/ginny/tcga_pancan/important_files/ptm_domain_combine_df.tsv"
-  # pc_data_name = "/data/ginny/tcga_pancan/KICH_somatic/KICH_somatic_mc3_pc_pos.tsv"
-  # npc_data_name = "/data/ginny/tcga_pancan/KICH_somatic/KICH_somatic_mc3_npc.tsv"
-  # cancer_barcode = kich_barcode
+  # pc_data_name = "/data/ginny/tcga_pancan/TCGA_all/BRCA_somatic/BRCA_somatic_mc3_pc_pos.tsv"
+  # npc_data_name = "/data/ginny/tcga_pancan/TCGA_all/BRCA_somatic/BRCA_somatic_mc3_npc.tsv"
+  # cancer_barcode = brca_barcode
   # locus_level_mut_min = 2
-  # output_dir = "/data/ginny/tcga_pancan/KICH_somatic/KICH_summarise_mutation/"
+  # gene_level_mut_min = 1
+  # output_dir = "/data/ginny/tcga_pancan/TCGA_all/BRCA_somatic/test/"
+  
+  
   
   locus_level_matrix (
     pc_data_name = pc_data_name,
@@ -114,10 +118,29 @@ somatic_piu_mapping = function (ptm_domain_filename,
   
   if(file.exists(paste0(output_dir,"mc3_count_matrix.tsv")))
   {
-    cat("1/3...locus level count matrix generated.","\n")
+    cat("1/4...locus level count matrix generated.","\n")
     
   }else{
-    cat("1/3...proceed to PIU mapping.","\n")
+    cat("1/4...proceed to gene level mapping.","\n")
+  }
+  
+  
+  
+  
+  gene_level_matrix (
+    pc_data_name = pc_data_name,
+    cancer_barcode = cancer_barcode,
+    mut_freq_min = gene_level_mut_min,
+    output_dir = output_dir,
+    output_filename = "gene_level_count_matrix.tsv")
+  
+  
+  if(file.exists(paste0(output_dir,"gene_level_count_matrix.tsv")))
+  {
+    cat("2/4...gene level count matrix generated.","\n")
+    
+  }else{
+    cat("2/4...proceed to PIU mapping.","\n")
   }
   
   
@@ -131,10 +154,10 @@ somatic_piu_mapping = function (ptm_domain_filename,
   
   if(file.exists(paste0(output_dir,"piu_mapping_count.tsv")))
   {
-    cat("2/3...PIU and bPIU count matrices generated.","\n")
+    cat("3/4...PIU and bPIU count matrices generated.","\n")
     
   }else{
-    cat("2/3...proceed to nPC mapping.","\n")
+    cat("3/4...proceed to nPC mapping.","\n")
   }
   
 
@@ -147,11 +170,11 @@ somatic_piu_mapping = function (ptm_domain_filename,
   
   if(file.exists(paste0(output_dir,"npc_summarising_count.tsv")))
   {
-    cat("3/3...nPC count matrix generated.","\n")
+    cat("4/4...nPC count matrix generated.","\n")
     
     
   }else{
-    cat("3/3.. no nPC mapped.","\n")
+    cat("4/4.. no nPC mapped.","\n")
   }
   
   

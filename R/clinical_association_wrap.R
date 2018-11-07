@@ -29,18 +29,25 @@
 #'                                           output_dir = "/data/ginny/tcga_pancan/STAD_somatic/cox_model/")
 
 
-univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
-                                                      piu_filename,
-                                                      cdr_clinical,
-                                                      gender_as_covariate = T,
-                                                      race_group_min = 6,
-                                                      min_surv_days = 30,
-                                                      min_surv_people = 5,
-                                                      row_sum_min = 2,
-                                                      mutation_type = "somatic",
-                                                      #piu_of_interest = "domain",
-                                                      output_dir)
+### add gene level regression to this 
+
+univariate_cox_model_for_somatic_locus_piu_gene = function(locus_filename,
+                                                           piu_filename,
+                                                           gene_filename,
+                                                           cdr_clinical,
+                                                           gender_as_covariate = T,
+                                                           race_group_min = 6,
+                                                           min_surv_days = 30,
+                                                           min_surv_people = 5,
+                                                           row_sum_min = 2,
+                                                           mutation_type = "somatic",
+                                                           #piu_of_interest = "domain",
+                                                           output_dir)
  {
+  
+  
+  
+  
     if(file.exists(locus_filename))
   {
     locus_unite = locus_counts_cdr_clinical_unite (
@@ -77,14 +84,66 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
         output_name = paste0(mutation_type, "_cdr_univariate_locus.tsv"))
       
     }
-        cat("1/2...univariate Cox regression model on locus level counts fitted!", "\n")
+        cat("1/3...univariate Cox regression model on locus level counts fitted!", "\n")
     
   }else{
     
-    cat("1/2...locus level data not available, proceed to PIU level.", "\n")
+    cat("1/3...locus level data not available, proceed to gene level.", "\n")
     
     
   }
+  
+  
+#######################################################################################
+
+  
+  if(file.exists(gene_filename))
+  {
+    gene_unite = gene_counts_cdr_clinical_unite (
+      gene_count_filename = gene_filename,
+      cdr_clinical = cdr_clinical,
+      row_sum_min = row_sum_min,
+      output_dir =  output_dir,
+      output_name = paste0(mutation_type, "_gene_level_cdr_clinical_unite.tsv"))
+    
+    gene_info = cdr_tidy_up_for_model(
+      interest_variable_info = gene_unite[[2]],
+      unite_data = gene_unite[[1]],
+      race_group_min = race_group_min,
+      output_dir = output_dir,
+      output_name = paste0(mutation_type, "_gene_level_survival_info.tsv"))
+    
+    if(gender_as_covariate == T)
+    {
+      fit_survival_model(
+        surv_info_data = gene_info,
+        interest_variable_info = gene_unite[[2]],
+        min_surv_time = min_surv_days,
+        min_surv_people = min_surv_people,
+        output_dir =  output_dir,
+        output_name = paste0(mutation_type, "_cdr_univariate_gene.tsv"))
+      
+    }else{
+      fit_survival_model_no_gender(
+        surv_info_data = gene_info,
+        interest_variable_info = gene_unite[[2]],
+        min_surv_time = min_surv_days,
+        min_surv_people = min_surv_people,
+        output_dir =  output_dir,
+        output_name = paste0(mutation_type, "_cdr_univariate_gene.tsv"))
+      
+    }
+    cat("2/3...univariate Cox regression model on gene level counts fitted!", "\n")
+    
+  }else{
+    
+    cat("2/3...gene level data not available, proceed to PIU level.", "\n")
+    
+    
+  }
+  
+  
+  
     ###
   if(file.exists(piu_filename))
   {
@@ -175,10 +234,10 @@ univariate_cox_model_for_somatic_locus_piu = function(locus_filename,
       cat("...this type of PIU level data not available.", "\n")
     }
      
-    cat("2/2...univariate Cox regression model on PIU level counts fitted!", "\n")
+    cat("3/3...univariate Cox regression model on PIU level counts fitted!", "\n")
     
   }else{
-    cat("2/2...PIU level data not available.", "\n")
+    cat("3/3...PIU level data not available.", "\n")
     
   }
   

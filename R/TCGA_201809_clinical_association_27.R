@@ -153,6 +153,70 @@ locus_counts_cdr_clinical_unite = function(locus_count_filename,
 
 
 
+# for somatic gene level counts -------------------------------------------
+
+
+gene_counts_cdr_clinical_unite = function(gene_count_filename,
+                                           cdr_clinical,
+                                           row_sum_min,
+                                           output_dir,
+                                           output_name)
+  
+{
+  
+  # 
+  # gene_count_filename = gene_filename
+  # cdr_clinical = this_cdr
+  # row_sum_min = row_sum_min
+  # output_dir =  output_dir
+  # output_name = paste0(mutation_type, "_gene_level_cdr_clinical_unite.tsv")
+  # 
+  gene_count_df = fread(gene_count_filename,
+                         stringsAsFactors = F)
+  
+  gene_count_sel = gene_count_df%>%
+    dplyr::filter(row_sum >= row_sum_min)
+  
+  #piu_info = piu_count_sel$piu_info
+  
+  
+  which_barcode = grep("TCGA", colnames(gene_count_sel))
+  
+  gene_matrix = t(as.matrix(gene_count_sel[,which_barcode]))
+  
+  gene_count = data.frame(barcode = colnames(gene_count_sel)[which_barcode],
+                           gene_matrix,
+                           stringsAsFactors = F)
+  
+  colnames(gene_count) = c("barcode", gene_count_sel$gene_info)
+  rownames(gene_count) = NULL
+  
+  
+  gene_clinical_unite_data = gene_count %>%
+    dplyr::left_join(cdr_clinical, by = c("barcode" = "bcr_patient_barcode")) %>%
+    dplyr::select(barcode,colnames(cdr_clinical)[3:34],everything())
+  
+  
+  return_list = vector(mode = "list", length = 2)
+  
+  return_list[[1]] = gene_clinical_unite_data
+  return_list[[2]] = gene_count_sel$gene_info
+  
+
+  write.table(return_list[[1]], paste0(output_dir, output_name),
+              quote = F, row.names = F, sep = "\t")
+  
+  
+  
+  return(return_list)
+  
+}
+
+
+
+
+
+
 # get the germline npc counts and clinical info united before modelling ----------------
 ## used in generating results for point3
 gene_level_counts_cdr_clinical_unite = function(gene_level_count_filename,

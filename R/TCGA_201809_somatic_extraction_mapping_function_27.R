@@ -123,6 +123,91 @@ annotate_mc3_pc_position_info= function(pc_data_name,
 
 
 
+# construct gene level count matrix --------------------------------------
+
+
+gene_level_matrix = function(pc_data_name,
+                              cancer_barcode,
+                              mut_freq_min,
+                              output_dir,
+                              output_filename)
+{
+  # pc_data_name = pc_data_name
+  # cancer_barcode = cancer_barcode
+  # mut_freq_min = gene_level_mut_min
+  # output_dir = output_dir
+  # output_filename = "gene_level_count_matrix.tsv"
+  # 
+  
+  pc_data = fread(pc_data_name, stringsAsFactors = F)
+  
+  
+  gene_df = pc_data%>%
+    dplyr::mutate(gene_info = paste(Hugo_Symbol,Gene, sep = "_"))
+  
+  
+  all_gene = unique(gene_df$gene_info)
+  
+  sl_matrix = matrix(0, nrow = length(all_gene), ncol = length(cancer_barcode))
+  colnames(sl_matrix) = cancer_barcode
+  
+  
+  
+  if(nrow(sl_matrix)>0)
+  {
+    for(i in 1:nrow(sl_matrix))
+    {
+      get_this_gene_df = gene_df%>%
+        dplyr::filter(gene_info == all_gene[i])
+      
+      
+      this_gene_patients = unlist(lapply(1:nrow(get_this_gene_df), function(x){
+        this_patient =  unlist(strsplit(get_this_gene_df$agg_sample_id[x], split = "_"))
+        return(this_patient)
+      }))
+      
+      tdf = as.data.frame(table(this_gene_patients), stringsAsFactors = F)
+      matrix_df = data.frame(pbr = cancer_barcode, count = 0, stringsAsFactors = F)
+      
+      get_counts = matrix_df %>%
+        dplyr::left_join(tdf, by = c("pbr" = "this_gene_patients")) %>%
+        replace(is.na(.),0) 
+      
+
+      sl_matrix[i,] = get_counts$Freq
+      
+      if(i%%100 ==0)
+        cat(i,"\n")
+      
+    }
+    
+    
+    
+    gene_count_df = data.frame(all_gene, sl_matrix, row_sum = rowSums(sl_matrix), stringsAsFactors = F)
+    colnames(gene_count_df) = c("gene_info", cancer_barcode, "row_sum")
+    
+    gene_count =  gene_count_df %>%
+      dplyr::arrange(desc(row_sum)) %>%
+      dplyr::filter(row_sum >= mut_freq_min)
+    
+    
+    write.table(gene_count, paste0(output_dir, output_filename),
+                quote =F, row.names = F, sep = "\t")
+    
+    
+  }else{
+    
+    cat("No frequent gene level data.","\n")
+  }
+  
+}
+
+
+
+
+
+
+
 # construct locus level count matrix --------------------------------------
 
 
